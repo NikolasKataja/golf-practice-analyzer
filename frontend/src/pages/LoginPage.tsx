@@ -27,7 +27,7 @@ export default function LoginPage() {
 
   // Signed-in users do not need to see the login form
   if (user) {
-    return <Navigate to="/account" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -41,7 +41,7 @@ export default function LoginPage() {
       setPassword("");
 
       // Replace the login entry in browser history
-      navigate("/account", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Sign-in failed.");
     } finally {

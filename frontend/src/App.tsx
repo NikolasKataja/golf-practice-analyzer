@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router'
+import DashboardPage from './pages/DashboardPage'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { useAuth } from './hooks/useAuth'
 import AccountPage from './pages/AccountPage'
@@ -38,6 +39,11 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/account" element={<AccountPage />} />
       </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
+      
 
       <Route path="/" element={<Navigate to="/account" replace />} />
 

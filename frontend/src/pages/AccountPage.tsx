@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router' 
 import { useAuth } from '../hooks/useAuth'
 import DeleteAccountForm from '../components/auth/DeleteAccountForm'
 
 export default function AccountPage() {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -34,6 +36,10 @@ export default function AccountPage() {
       </button>
 
       {error && <p role="alert">{error}</p>}
+
+      <button onClick={() => void navigate('/dashboard')}>
+        Go to Dashboard
+      </button>
 
       <DeleteAccountForm disabled={isSubmitting} />
     </main>
