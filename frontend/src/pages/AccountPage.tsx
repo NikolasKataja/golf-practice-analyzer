@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import DeleteAccountForm from '../components/auth/DeleteAccountForm'
 
 export default function AccountPage() {
   const { user, logout } = useAuth()
@@ -33,6 +34,8 @@ export default function AccountPage() {
       </button>
 
       {error && <p role="alert">{error}</p>}
+
+      <DeleteAccountForm disabled={isSubmitting} />
     </main>
   )
 }
