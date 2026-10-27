@@ -1,69 +1,75 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router'
-import { authPost } from '../api/auth'
-import { useAuth } from '../hooks/useAuth'
+import { useState } from "react";
+import type { FormEvent } from "react";
+import { Link, Navigate, useNavigate } from "react-router";
+import { authPost } from "../api/auth";
+import { useAuth } from "../hooks/useAuth";
+import AuthLayout from "../components/auth/AuthLayout";
+import GolfBall from "../components/3d/GolfBall";
 
 export default function RegisterPage() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   // Signed-in users already have an account
   if (user) {
-    return <Navigate to="/account" replace />
+    return <Navigate to="/account" replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError('')
+    event.preventDefault();
+    setError("");
 
     // Confirm the password locally before sending it to the backend
     if (password !== confirmPassword) {
-      setError('Passwords do not match.')
-      return
+      setError("Passwords do not match.");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      await authPost('register', {
+      await authPost("register", {
         email: email.trim(),
         password,
-      })
+      });
 
-      setPassword('')
-      setConfirmPassword('')
+      setPassword("");
+      setConfirmPassword("");
 
       // Registration does not create a signed-in session
       // Pass a success message to the login page through router state
-      navigate('/login', {
+      navigate("/login", {
         replace: true,
-        state: { message: 'Account created. You can now sign in.' },
-      })
+        state: { message: "Account created. You can now sign in." },
+      });
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : 'Account creation failed.',
-      )
+        error instanceof Error ? error.message : "Account creation failed.",
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <main>
-      <h1>Create an account</h1>
-
-      <form onSubmit={handleSubmit}>
+    <AuthLayout
+      title="Create an account"
+      visual={<GolfBall />} 
+      footer={
+        <p>
+          Already have an account? <Link to="/login">Sign in</Link>
+        </p>
+      }
+    >
+      <form onSubmit={handleSubmit} aria-busy={isSubmitting}>
         <fieldset disabled={isSubmitting}>
-          <legend>Account details</legend>
+          <legend className="auth-layout__legend">Account details</legend>
 
           <p>
             <label htmlFor="register-email">Email</label>
@@ -78,7 +84,7 @@ export default function RegisterPage() {
             />
           </p>
 
-          <p>
+          <div>
             <label htmlFor="register-password">Password</label>
             <input
               id="register-password"
@@ -90,9 +96,11 @@ export default function RegisterPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
-          </p>
 
-          <p id="password-help">Use at least 12 characters.</p>
+            <p id="password-help" className="auth-layout__hint">
+              Use at least 12 characters.
+            </p>
+          </div>
 
           <p>
             <label htmlFor="confirm-password">Confirm password</label>
@@ -107,17 +115,13 @@ export default function RegisterPage() {
             />
           </p>
 
+          {error && <p role="alert">{error}</p>}
+
           <button type="submit">
-            {isSubmitting ? 'Creating account...' : 'Create account'}
+            {isSubmitting ? "Creating account..." : "Create account"}
           </button>
         </fieldset>
-
-        {error && <p role="alert">{error}</p>}
       </form>
-
-      <p>
-        Already have an account? <Link to="/login">Sign in</Link>
-      </p>
-    </main>
-  )
+    </AuthLayout>
+  );
 }

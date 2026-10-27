@@ -1,0 +1,48 @@
+:root {
+  color-scheme: dark;
+
+  /* Backgrounds */
+  --color-background: #15181c;
+  --color-surface: #20252b;
+  --color-input: #171c21;
+
+  /* Text */
+  --color-text: #f2f5f8;
+  --color-text-muted: #b5bec8;
+
+  /* Primary action: inspired by the golf ball material */
+  --color-primary: #0991e7;
+  --color-primary-hover: #30a6f0;
+  --color-on-primary: #101820;
+
+  /* Links and keyboard focus */
+  --color-link: #70c5ff;
+  --color-focus: #70c5ff;
+
+  /* Boundaries and feedback */
+  --color-border: #788592;
+  --color-divider: #3b444e;
+  --color-error: #ffaaaa;
+  --color-success: #8cdeb0;
+
+  /* Typography */
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-size-body: 1rem;
+  --line-height-body: 1.6;
+
+  /* Consistent spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Shapes and layout */
+  --radius-small: 0.375rem;
+  --radius-medium: 0.75rem;
+  --width-form: 28rem;
+  --width-content: 75rem;
+}

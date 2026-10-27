@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { Navigate, useNavigate, Link, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import AuthLayout from "../components/auth/AuthLayout";
+import GolfBall from "../components/3d/GolfBall";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
@@ -50,14 +52,20 @@ export default function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Sign in</h1>
+    <AuthLayout
+      title="Sign in"
+      visual={<GolfBall />}
+      footer={
+        <p>
+          No account yet? <Link to="/register">Create an account</Link>
+        </p>
+      }
+    >
+      {successMessage && !error && <p role="status">{successMessage}</p>}
 
-      {successMessage && <p role="status">{successMessage}</p>}
-
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-busy={isSubmitting}>
         <fieldset disabled={isSubmitting}>
-          <legend>Account details</legend>
+          <legend className="auth-layout__legend">Sign-in details</legend>
 
           <p>
             <label htmlFor="login-email">Email</label>
@@ -84,16 +92,13 @@ export default function LoginPage() {
             />
           </p>
 
+          {error && <p role="alert">{error}</p>}
+
           <button type="submit">
             {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </fieldset>
-
-        {error && <p role="alert">{error}</p>}
       </form>
-      <p>
-        No account yet? <Link to="/register">Create an account</Link>
-      </p>
-    </main>
+    </AuthLayout>
   );
 }
