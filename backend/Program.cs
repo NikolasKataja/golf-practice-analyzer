@@ -3,6 +3,7 @@ using GolfPracticeAnalyzer.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using GolfPracticeAnalyzer.Api.Models;
 using Microsoft.AspNetCore.Identity;
+using GolfPracticeAnalyzer.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -121,6 +122,9 @@ builder.Services.AddAntiforgery(options =>
         ? CookieSecurePolicy.SameAsRequest
         : CookieSecurePolicy.Always;
 });
+
+// Provide the CSV reader to controllers through dependency injection.
+builder.Services.AddScoped<SwingSyncCsvReader>();
 
 var app = builder.Build();
 
