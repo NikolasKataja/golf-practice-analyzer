@@ -25,12 +25,12 @@ public class PracticeSessionsController : ControllerBase
     IAntiforgery antiforgery,
     SwingSyncCsvReader csvReader
 )
-{
-    _dbContext = dbContext;
-    _userManager = userManager;
-    _antiforgery = antiforgery;
-    _csvReader = csvReader;
-}
+    {
+        _dbContext = dbContext;
+        _userManager = userManager;
+        _antiforgery = antiforgery;
+        _csvReader = csvReader;
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -44,7 +44,7 @@ public class PracticeSessionsController : ControllerBase
         }
         catch (AntiforgeryValidationException)
         {
-            return BadRequest("Invalid CSRF token.");
+            return BadRequest(new { message = "Invalid CSRF token." });
         }
 
         // Resolve the owner from the authenticated identity, never from input
@@ -71,7 +71,8 @@ public class PracticeSessionsController : ControllerBase
             // Add shots through the navigation property so EF Core links
             // them to the new session when both are saved.
             session.Shots.Add(new Shot
-            {ShotNumber = index + 1,
+            {
+                ShotNumber = index + 1,
                 Club = shotRequest.Club!.Trim(),
                 Carry = shotRequest.Carry!.Value,
                 CarrySide = shotRequest.CarrySide!.Value,
@@ -97,70 +98,146 @@ public class PracticeSessionsController : ControllerBase
     }
 
     [HttpPost("import/preview")]
-[RequestSizeLimit(2 * 1024 * 1024)]
-public async Task<IActionResult> PreviewImport([FromForm] IFormFile file)
-{
-    // Validate the token sent with the uploaded file.
-    try
+    [RequestSizeLimit(2 * 1024 * 1024)]
+    public async Task<IActionResult> PreviewImport([FromForm] IFormFile file)
     {
-        await _antiforgery.ValidateRequestAsync(HttpContext);
-    }
-    catch (AntiforgeryValidationException)
-    {
-        return BadRequest(new { message = "Invalid CSRF token." });
-    }
-
-    var user = await _userManager.GetUserAsync(User);
-
-    if (user is null)
-    {
-        return Unauthorized();
-    }
-
-    if (file.Length == 0)
-    {
-        return BadRequest(new { message = "The uploaded file is empty." });
-    }
-
-    // The extension is a usability check; the reader validates the content.
-    if (!string.Equals(
-            Path.GetExtension(file.FileName),
-            ".csv",
-            StringComparison.OrdinalIgnoreCase))
-    {
-        return BadRequest(new { message = "Please select a CSV file." });
-    }
-
-    try
-    {
-        using var stream = file.OpenReadStream();
-
-        var shots = await _csvReader.ReadAsync(stream);
-
-        // Return selected fields instead of complete EF Core entities.
-        // This preview does not add anything to the database.
-        return Ok(new
+        // Validate the token sent with the uploaded file.
+        try
         {
-            shotCount = shots.Count,
-            clubs = shots.Select(shot => shot.Club).Distinct().ToList(),
-            shots = shots.Select(shot => new
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        if (file.Length == 0)
+        {
+            return BadRequest(new { message = "The uploaded file is empty." });
+        }
+
+        // The extension is a usability check; the reader validates the content.
+        if (!string.Equals(
+                Path.GetExtension(file.FileName),
+                ".csv",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Please select a CSV file." });
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+
+            var shots = await _csvReader.ReadAsync(stream);
+
+            // Return selected fields instead of complete EF Core entities.
+            // This preview does not add anything to the database.
+            return Ok(new
             {
-                shot.ShotNumber,
-                shot.ShotAt,
-                shot.Club,
-                shot.Carry,
-                shot.CarrySide,
-                shot.BallSpeed,
-                shot.LaunchAngle,
-                shot.PeakHeight,
-                shot.TotalDistance
-            }).ToList()
+                shotCount = shots.Count,
+                clubs = shots.Select(shot => shot.Club).Distinct().ToList(),
+                shots = shots.Select(shot => new
+                {
+                    shot.ShotNumber,
+                    shot.ShotAt,
+                    shot.Club,
+                    shot.Carry,
+                    shot.CarrySide,
+                    shot.BallSpeed,
+                    shot.LaunchAngle,
+                    shot.PeakHeight,
+                    shot.TotalDistance
+                }).ToList()
+            });
+        }
+        catch (FormatException exception)
+        {
+            // The reader provides controlled messages with row and column details.
+            return BadRequest(new { message = exception.Message });
+        }
+    }
+    [HttpPost("import")]
+    [RequestSizeLimit(2 * 1024 * 1024)]
+    public async Task<IActionResult> Import(
+        [FromForm] ImportPracticeSessionRequest request
+    )
+    {
+        try
+        {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        // Resolve the owner from the authenticated identity.
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        // [ApiController] validates the DTO before this method is executed.
+        var file = request.File!;
+
+        if (file.Length == 0)
+        {
+            return BadRequest(new { message = "The uploaded file is empty." });
+        }
+
+        if (!string.Equals(
+                Path.GetExtension(file.FileName),
+                ".csv",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Please select a CSV file." });
+        }
+
+        List<Shot> shots;
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+
+            // Read and validate the complete file before tracking any new records.
+            shots = await _csvReader.ReadAsync(stream);
+        }
+        catch (FormatException exception)
+        {
+            return BadRequest(new { message = exception.Message });
+        }
+
+        var session = new PracticeSession
+        {
+            UserId = user.Id,
+            Name = request.Name!.Trim(),
+            PracticeDate = request.PracticeDate!.Value,
+            Shots = shots
+        };
+
+        // EF Core links the imported shots to this new session.
+        _dbContext.PracticeSessions.Add(session);
+
+        // Save the entire session in one operation.
+        // The database transaction prevents a partial import if saving fails.
+        await _dbContext.SaveChangesAsync();
+
+        return StatusCode(StatusCodes.Status201Created, new
+        {
+            session.Id,
+            session.Name,
+            session.PracticeDate,
+            ShotCount = session.Shots.Count
         });
     }
-    catch (FormatException exception)
-    {
-        // The reader provides controlled messages with row and column details.
-        return BadRequest(new { message = exception.Message });
-    }
-}
 }
