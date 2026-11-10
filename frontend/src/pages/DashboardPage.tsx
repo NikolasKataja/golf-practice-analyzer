@@ -1,15 +1,23 @@
-import { useNavigate, Link } from 'react-router' 
+import { Link } from 'react-router'
+import PracticeSessionList from '../components/practiceSessions/PracticeSessionList'
 
 export default function DashboardPage() {
-  const navigate = useNavigate()
   return (
     <main>
       <h1>Dashboard</h1>
-      <button onClick={() => void navigate('/account')}>
-        Go to Account
-      </button>
-      <Link to="/practice-sessions/import">Import practice session</Link>
+
+      <nav aria-label="Dashboard navigation">
+        <p>
+          <Link to="/account">Go to Account</Link>
+        </p>
+        <p>
+          <Link to="/practice-sessions/import">
+            Import practice session
+          </Link>
+        </p>
+      </nav>
+
+      <PracticeSessionList />
     </main>
   )
 }
-

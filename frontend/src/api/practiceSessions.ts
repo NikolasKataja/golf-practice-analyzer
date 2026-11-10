@@ -62,3 +62,24 @@ export function importCsv(
 
   return postCsv<ImportedPracticeSession>('', formData)
 }
+
+export type PracticeSessionSummary = {
+  id: number
+  name: string
+  practiceDate: string
+  shotCount: number
+}
+
+export async function getPracticeSessions(
+  signal?: AbortSignal,
+): Promise<PracticeSessionSummary[]> {
+  const response = await fetch('/api/practice-sessions', {
+    signal,
+    cache: 'no-store'
+  })
+
+  if (!response.ok) {
+    throw new Error(await getError(response))
+  }
+  return response.json()
+}

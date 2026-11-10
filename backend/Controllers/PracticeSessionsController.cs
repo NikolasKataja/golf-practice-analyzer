@@ -1,5 +1,6 @@
 using GolfPracticeAnalyzer.Api.Data;
 using GolfPracticeAnalyzer.Api.DTOs.PracticeSessions;
+using Microsoft.EntityFrameworkCore;
 using GolfPracticeAnalyzer.Api.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
@@ -24,12 +25,47 @@ public class PracticeSessionsController : ControllerBase
     UserManager<ApplicationUser> userManager,
     IAntiforgery antiforgery,
     SwingSyncCsvReader csvReader
-)
+    )
+
     {
         _dbContext = dbContext;
         _userManager = userManager;
         _antiforgery = antiforgery;
         _csvReader = csvReader;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(
+        CancellationToken cancellationToken
+    )
+    {
+        // Resolve the owner from the autenticated identity
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Filter by owner before selecting the data returned to the client
+        var sessions = await _dbContext.PracticeSessions
+            .AsNoTracking()
+            .Where(session => session.UserId == user.Id)
+            .OrderByDescending(session => session.PracticeDate)
+            .ThenByDescending(session => session.Id)
+            .Select(session => new
+            {
+                session.Id,
+                session.Name,
+                session.PracticeDate,
+                ShotCount = session.Shots.Count
+            })
+            .ToListAsync(cancellationToken);
+
+            // Prevent the browser from caching this response
+            Response.Headers.CacheControl = "no-store";
+
+            return Ok(sessions);
     }
 
     [HttpPost]
