@@ -4,7 +4,7 @@ export type AuthUser = {
 }
 
 // Read an API error and turn it into a message for UI
-async function getError(response: Response): Promise<string> {
+export async function getError(response: Response): Promise<string> {
     const data = await response.json().catch(() => null)
 
     // identity errors are arrays; validation errors are grouped by fields
@@ -27,19 +27,28 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     return response.json()
 }
 
-// Fetch a fresh CSRF token before every request that changes data
-// This also handles identity changes after login and logout
+// Fetch a fresh token for the current session before sending a POST request.
+export async function getCsrfToken(): Promise<string> {
+    const response = await fetch('/api/auth/csrf')
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch CSRF token")
+    }
+
+    const { token } = await response.json()
+    
+    if (typeof token !== 'string' || !token) {
+        throw new Error('The server did not return a CSRF token')
+    }
+    return token
+}
+
+// Send an authentication request with a fresh CSRF token.
 export async function authPost(
     action: 'register' | 'login' | 'logout' | 'delete-account',
     body?: { email?: string; password?: string }
 ): Promise<void> {
-    const tokenResponse = await fetch('/api/auth/csrf')
-
-    if (!tokenResponse.ok) {
-        throw new Error("Failed to fetch CSRF token")
-    }
-
-    const { token } = await tokenResponse.json()
+    const token = await getCsrfToken()
 
     const response = await fetch(`/api/auth/${action}`, {
         method: 'POST',

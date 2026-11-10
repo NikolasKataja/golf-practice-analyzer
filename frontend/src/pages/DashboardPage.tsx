@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router' 
+import { useNavigate, Link } from 'react-router' 
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -8,6 +8,7 @@ export default function DashboardPage() {
       <button onClick={() => void navigate('/account')}>
         Go to Account
       </button>
+      <Link to="/practice-sessions/import">Import practice session</Link>
     </main>
   )
 }

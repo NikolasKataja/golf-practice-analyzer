@@ -5,6 +5,7 @@ import { useAuth } from './hooks/useAuth'
 import AccountPage from './pages/AccountPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ImportPracticeSessionPage from './pages/ImportPracticeSessionPage'
 
 export default function App() {
   const { isLoading, error, refreshSession } = useAuth()
@@ -42,6 +43,10 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route 
+          path="/practice-sessions/import"
+          element={<ImportPracticeSessionPage />}
+        />
       </Route>
       
 
