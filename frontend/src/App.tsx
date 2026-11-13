@@ -6,6 +6,7 @@ import AccountPage from './pages/AccountPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ImportPracticeSessionPage from './pages/ImportPracticeSessionPage'
+import CreatePracticeSessionPage from './pages/CreatePracticeSessionPage'
 
 export default function App() {
   const { isLoading, error, refreshSession } = useAuth()
@@ -46,6 +47,10 @@ export default function App() {
         <Route 
           path="/practice-sessions/import"
           element={<ImportPracticeSessionPage />}
+        />
+        <Route
+          path="/practice-sessions/create"
+          element={<CreatePracticeSessionPage />}
         />
       </Route>
       

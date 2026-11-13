@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import PracticeSessionList from '../components/practiceSessions/PracticeSessionList'
+import AddPracticeSessionMenu from '../components/practiceSessions/AddPracticeSessionMenu'
 
 export default function DashboardPage() {
   return (
@@ -10,13 +11,9 @@ export default function DashboardPage() {
         <p>
           <Link to="/account">Go to Account</Link>
         </p>
-        <p>
-          <Link to="/practice-sessions/import">
-            Import practice session
-          </Link>
-        </p>
       </nav>
 
+      <AddPracticeSessionMenu />
       <PracticeSessionList />
     </main>
   )

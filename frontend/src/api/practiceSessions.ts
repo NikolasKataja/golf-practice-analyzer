@@ -83,3 +83,44 @@ export async function getPracticeSessions(
   }
   return response.json()
 }
+
+export type CreateShotRequest = {
+  club: string
+  carry: number
+  carrySide: number
+  ballSpeed: number | null
+  launchAngle: number | null
+  peakHeight: number | null
+  totalDistance: number | null
+}
+
+export type CreatePracticeSessionRequest = {
+  name: string
+  practiceDate: string
+  shots: CreateShotRequest[]
+}
+
+export async function createPracticeSession(
+  request: CreatePracticeSessionRequest,
+): Promise<PracticeSessionSummary> {
+  const token = await getCsrfToken()
+
+  const response = await fetch('/api/practice-sessions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': token,
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (response.status === 401) {
+    throw new Error('Your session has expired. Sign in again.')
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response))
+  }
+
+  return response.json()
+}
