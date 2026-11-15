@@ -62,10 +62,63 @@ public class PracticeSessionsController : ControllerBase
             })
             .ToListAsync(cancellationToken);
 
-            // Prevent the browser from caching this response
-            Response.Headers.CacheControl = "no-store";
+        // Prevent the browser from caching this response
+        Response.Headers.CacheControl = "no-store";
 
-            return Ok(sessions);
+        return Ok(sessions);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(
+    int id,
+    CancellationToken cancellationToken
+)
+    {
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        // Check both the session ID and ownership in the database query.
+        var session = await _dbContext.PracticeSessions
+            .AsNoTracking()
+            .Where(session => session.Id == id && session.UserId == user.Id)
+            .Select(session => new
+            {
+                session.Id,
+                session.Name,
+                session.PracticeDate,
+                Shots = session.Shots
+                    .OrderBy(shot => shot.ShotNumber)
+                    .Select(shot => new
+                    {
+                        shot.Id,
+                        shot.ShotNumber,
+                        shot.ShotAt,
+                        shot.Club,
+                        shot.Carry,
+                        shot.CarrySide,
+                        shot.BallSpeed,
+                        shot.LaunchAngle,
+                        shot.PeakHeight,
+                        shot.TotalDistance
+                    })
+                    .ToList()
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        // Do not cache user-specific practice data.
+        Response.Headers.CacheControl = "no-store";
+
+        // Use the same response for a missing session and another user's session.
+        if (session is null)
+        {
+            return NotFound(new { message = "Practice session not found." });
+        }
+
+        return Ok(session);
     }
 
     [HttpPost]
@@ -275,5 +328,50 @@ public class PracticeSessionsController : ControllerBase
             session.PracticeDate,
             ShotCount = session.Shots.Count
         });
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(
+    int id,
+    UpdatePracticeSessionRequest request,
+    CancellationToken cancellationToken
+)
+    {
+        try
+        {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        // Load only a session owned by the authenticated user.
+        var session = await _dbContext.PracticeSessions
+            .SingleOrDefaultAsync(
+                session => session.Id == id && session.UserId == user.Id,
+                cancellationToken
+            );
+
+        if (session is null)
+        {
+            return NotFound(new { message = "Practice session not found." });
+        }
+
+        // Update only the editable practice details.
+        // The owner and related shots remain unchanged.
+        session.Name = request.Name!.Trim();
+        session.PracticeDate = request.PracticeDate!.Value;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
     }
 }

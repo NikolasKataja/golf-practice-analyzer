@@ -124,3 +124,82 @@ export async function createPracticeSession(
 
   return response.json()
 }
+
+export type PracticeSessionShot = {
+  id: number
+  shotNumber: number
+  shotAt: string | null
+  club: string
+  carry: number
+  carrySide: number
+  ballSpeed: number | null
+  launchAngle: number | null
+  peakHeight: number | null
+  totalDistance: number | null
+}
+
+export type PracticeSessionDetails = {
+  id: number
+  name: string
+  practiceDate: string
+  shots: PracticeSessionShot[]
+}
+
+export async function getPracticeSession(
+  id: number,
+  signal?: AbortSignal,
+): Promise<PracticeSessionDetails> {
+  const response = await fetch(`/api/practice-sessions/${id}`, {
+    signal,
+    cache: 'no-store',
+  })
+
+  if (response.status === 404) {
+    throw new Error('Practice session not found.')
+  }
+
+  if (response.status === 401) {
+    throw new Error('Your session has expired. Sign in again.')
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response))
+  }
+
+  return response.json()
+}
+
+export type UpdatePracticeSessionRequest = {
+  name: string
+  practiceDate: string
+}
+
+export async function updatePracticeSession(
+  id: number,
+  request: UpdatePracticeSessionRequest,
+): Promise<void> {
+  const token = await getCsrfToken()
+
+  const response = await fetch(`/api/practice-sessions/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': token,
+    },
+    body: JSON.stringify(request),
+  })
+
+  if (response.status === 401) {
+    throw new Error('Your session has expired. Sign in again.')
+  }
+
+  if (response.status === 404) {
+    throw new Error('Practice session not found.')
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response))
+  }
+
+  // A successful update returns 204 with no response body.
+}

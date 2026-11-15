@@ -1,25 +1,26 @@
-import { useEffect, useState } from 'react'
-import { getPracticeSessions } from '../../api/practiceSessions'
-import type { PracticeSessionSummary } from '../../api/practiceSessions'
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
+import { getPracticeSessions } from "../../api/practiceSessions";
+import type { PracticeSessionSummary } from "../../api/practiceSessions";
 
 export default function PracticeSessionList() {
-  const [sessions, setSessions] = useState<PracticeSessionSummary[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [sessions, setSessions] = useState<PracticeSessionSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    const controller = new AbortController()
+    const controller = new AbortController();
 
     async function loadSessions() {
-      setIsLoading(true)
-      setError('')
+      setIsLoading(true);
+      setError("");
 
       try {
-        const data = await getPracticeSessions(controller.signal)
+        const data = await getPracticeSessions(controller.signal);
 
         if (!controller.signal.aborted) {
-          setSessions(data)
+          setSessions(data);
         }
       } catch (err) {
         // Leaving the page cancels the request without showing an error.
@@ -27,21 +28,21 @@ export default function PracticeSessionList() {
           setError(
             err instanceof Error
               ? err.message
-              : 'Could not load practice sessions.',
-          )
+              : "Could not load practice sessions.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) {
-          setIsLoading(false)
+          setIsLoading(false);
         }
       }
     }
 
-    void loadSessions()
+    void loadSessions();
 
     // Cancel the request when the component unmounts or the effect restarts.
-    return () => controller.abort()
-  }, [refreshKey])
+    return () => controller.abort();
+  }, [refreshKey]);
 
   return (
     <section aria-labelledby="practice-sessions-heading">
@@ -74,7 +75,11 @@ export default function PracticeSessionList() {
           <tbody>
             {sessions.map((session) => (
               <tr key={session.id}>
-                <td>{session.name}</td>
+                <td>
+                  <Link to={`/practice-sessions/${session.id}`}>
+                    {session.name}
+                  </Link>
+                </td>
                 <td>
                   <time dateTime={session.practiceDate}>
                     {session.practiceDate}
@@ -87,5 +92,5 @@ export default function PracticeSessionList() {
         </table>
       )}
     </section>
-  )
+  );
 }
