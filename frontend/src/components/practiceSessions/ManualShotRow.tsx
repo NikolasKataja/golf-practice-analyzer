@@ -1,52 +1,53 @@
 // Keep input values as strings so empty fields do not become zero.
 export type ManualShotDraft = {
-  id: number
-  club: string
-  carry: string
-  direction: '' | 'left' | 'centre' | 'right'
-  sideDistance: string
-  ballSpeed: string
-  launchAngle: string
-  peakHeight: string
-  totalDistance: string
-}
+  id: number;
+  club: string;
+  carry: string;
+  direction: "" | "left" | "centre" | "right";
+  sideDistance: string;
+  ballSpeed: string;
+  launchAngle: string;
+  peakHeight: string;
+  totalDistance: string;
+};
 
 const clubs = [
-  'Driver',
-  '3 Wood',
-  '5 Wood',
-  '7 Wood',
-  '3 Hybrid',
-  '4 Hybrid',
-  '5 Hybrid',
-  '2 Iron',
-  '3 Iron',
-  '4 Iron',
-  '5 Iron',
-  '6 Iron',
-  '7 Iron',
-  '8 Iron',
-  '9 Iron',
-  'Pitching Wedge',
-  'Gap Wedge',
-  'Sand Wedge',
-  'Lob Wedge',
-]
+  "Driver",
+  "3 Wood",
+  "5 Wood",
+  "7 Wood",
+  "3 Hybrid",
+  "4 Hybrid",
+  "5 Hybrid",
+  "2 Iron",
+  "3 Iron",
+  "4 Iron",
+  "5 Iron",
+  "6 Iron",
+  "7 Iron",
+  "8 Iron",
+  "9 Iron",
+  "Pitching Wedge",
+  "Gap Wedge",
+  "Sand Wedge",
+  "Lob Wedge",
+];
 
 const additionalFields = [
-  { name: 'ballSpeed', label: 'Ball speed (km/h)', min: 0 },
-  { name: 'launchAngle', label: 'Launch angle (°)', min: -9999999.999 },
-  { name: 'peakHeight', label: 'Peak height (m)', min: 0 },
-  { name: 'totalDistance', label: 'Total distance (m)', min: 0 },
-] as const
+  { name: "ballSpeed", label: "Ball speed (km/h)", min: 0 },
+  { name: "launchAngle", label: "Launch angle (°)", min: -9999999.999 },
+  { name: "peakHeight", label: "Peak height (m)", min: 0 },
+  { name: "totalDistance", label: "Total distance (m)", min: 0 },
+] as const;
 
 type Props = {
-  shot: ManualShotDraft
-  number: number
-  canRemove: boolean
-  onChange: (shot: ManualShotDraft) => void
-  onRemove: () => void
-}
+  shot: ManualShotDraft;
+  number: number;
+  canRemove: boolean;
+  hideRemove?: boolean;
+  onChange: (shot: ManualShotDraft) => void;
+  onRemove: () => void;
+};
 
 export default function ManualShotRow({
   shot,
@@ -54,8 +55,9 @@ export default function ManualShotRow({
   canRemove,
   onChange,
   onRemove,
+  hideRemove = false,
 }: Props) {
-  const prefix = `shot-${shot.id}`
+  const prefix = `shot-${shot.id}`;
 
   return (
     <tr>
@@ -73,7 +75,9 @@ export default function ManualShotRow({
         >
           <option value="">Choose a club</option>
           {clubs.map((club) => (
-            <option key={club} value={club}>{club}</option>
+            <option key={club} value={club}>
+              {club}
+            </option>
           ))}
         </select>
       </td>
@@ -101,14 +105,15 @@ export default function ManualShotRow({
           required
           value={shot.direction}
           onChange={(event) => {
-            const direction = event.currentTarget.value as ManualShotDraft['direction']
+            const direction = event.currentTarget
+              .value as ManualShotDraft["direction"];
 
             onChange({
               ...shot,
               direction,
               // Clear an old distance when the target line is selected.
-              sideDistance: direction === 'centre' ? '' : shot.sideDistance,
-            })
+              sideDistance: direction === "centre" ? "" : shot.sideDistance,
+            });
           }}
         >
           <option value="">Choose a direction</option>
@@ -117,9 +122,11 @@ export default function ManualShotRow({
           <option value="right">Right</option>
         </select>
 
-        {shot.direction !== 'centre' && (
+        {shot.direction !== "centre" && (
           <>
-            <label htmlFor={`${prefix}-side`}>Distance from target line (m)</label>
+            <label htmlFor={`${prefix}-side`}>
+              Distance from target line (m)
+            </label>
             <input
               id={`${prefix}-side`}
               type="number"
@@ -142,9 +149,7 @@ export default function ManualShotRow({
 
           {additionalFields.map((field) => (
             <p key={field.name}>
-              <label htmlFor={`${prefix}-${field.name}`}>
-                {field.label}
-              </label>
+              <label htmlFor={`${prefix}-${field.name}`}>{field.label}</label>
               <input
                 id={`${prefix}-${field.name}`}
                 type="number"
@@ -165,15 +170,17 @@ export default function ManualShotRow({
       </td>
 
       <td>
-        <button
-          type="button"
-          disabled={!canRemove}
-          aria-label={`Remove shot ${number}`}
-          onClick={onRemove}
-        >
-          Remove
-        </button>
+        {!hideRemove && (
+          <button
+            type="button"
+            disabled={!canRemove}
+            aria-label={`Remove shot ${number}`}
+            onClick={onRemove}
+          >
+            Remove
+          </button>
+        )}
       </td>
     </tr>
-  )
+  );
 }

@@ -417,4 +417,69 @@ public class PracticeSessionsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPut("{id:int}/shots/{shotId:int}")]
+    public async Task<IActionResult> UpdateShot(
+    int id,
+    int shotId,
+    CreateShotRequest request,
+    CancellationToken cancellationToken
+)
+    {
+        try
+        {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        // Match the shot, its session and the session owner in the same query.
+        var shot = await _dbContext.Shots
+            .SingleOrDefaultAsync(
+                shot => shot.Id == shotId
+                    && shot.PracticeSessionId == id
+                    && shot.PracticeSession.UserId == user.Id,
+                cancellationToken
+            );
+
+        if (shot is null)
+        {
+            return NotFound(new { message = "Shot not found." });
+        }
+
+        // Reuse the same input validation as manual shot creation.
+        shot.Club = request.Club!.Trim();
+        shot.Carry = request.Carry!.Value;
+        shot.CarrySide = request.CarrySide!.Value;
+        shot.BallSpeed = request.BallSpeed;
+        shot.LaunchAngle = request.LaunchAngle;
+        shot.PeakHeight = request.PeakHeight;
+        shot.TotalDistance = request.TotalDistance;
+
+        // Keep the shot ID, session, sequence number and timestamp unchanged.
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(new
+        {
+            shot.Id,
+            shot.ShotNumber,
+            shot.ShotAt,
+            shot.Club,
+            shot.Carry,
+            shot.CarrySide,
+            shot.BallSpeed,
+            shot.LaunchAngle,
+            shot.PeakHeight,
+            shot.TotalDistance
+        });
+    }
 }

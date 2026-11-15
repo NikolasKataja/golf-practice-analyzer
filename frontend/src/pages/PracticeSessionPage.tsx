@@ -4,6 +4,7 @@ import { getPracticeSession } from "../api/practiceSessions";
 import type { PracticeSessionDetails } from "../api/practiceSessions";
 import EditPracticeSessionForm from "../components/practiceSessions/EditPracticeSessionForm";
 import DeletePracticeSession from "../components/practiceSessions/DeletePracticeSession";
+import EditShotForm from "../components/practiceSessions/EditShotForm";
 
 function formatSide(value: number) {
   if (value === 0) return "On target line";
@@ -22,11 +23,15 @@ export default function PracticeSessionPage() {
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [editingShotId, setEditingShotId] = useState<number | null>(null);
+  const [shotMessage, setShotMessage] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadSession() {
+      setEditingShotId(null);
+      setShotMessage("");
       setIsDeleted(false);
       setIsLoading(true);
       setError("");
@@ -130,6 +135,7 @@ export default function PracticeSessionPage() {
                       <th scope="col">Club</th>
                       <th scope="col">Carry (m)</th>
                       <th scope="col">Side at landing</th>
+                      <th scope="col">Actions</th>
                     </tr>
                   </thead>
 
@@ -140,6 +146,18 @@ export default function PracticeSessionPage() {
                         <td>{shot.club}</td>
                         <td>{shot.carry}</td>
                         <td>{formatSide(shot.carrySide)}</td>
+                        <td>
+                          <button
+                            type="button"
+                            disabled={editingShotId !== null}
+                            onClick={() => {
+                              setShotMessage("");
+                              setEditingShotId(shot.id);
+                            }}
+                          >
+                            Edit shot
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -181,6 +199,37 @@ export default function PracticeSessionPage() {
               </details>
             </>
           )}
+
+          {/* Render the selected shot's editor outside the results table. */}
+          {session.shots
+            .filter((shot) => shot.id === editingShotId)
+            .map((shot) => (
+              <EditShotForm
+                key={shot.id}
+                sessionId={session.id}
+                shot={shot}
+                onCancel={() => setEditingShotId(null)}
+                onSaved={(updated) => {
+                  // Update both tables using the server's saved values.
+                  setSession((current) =>
+                    current
+                      ? {
+                          ...current,
+                          shots: current.shots.map((item) =>
+                            item.id === updated.id ? updated : item,
+                          ),
+                        }
+                      : current,
+                  );
+
+                  setEditingShotId(null);
+                  setShotMessage(`Shot ${updated.shotNumber} updated.`);
+                }}
+              />
+            ))}
+
+          {shotMessage && <p role="status">{shotMessage}</p>}
+
           <DeletePracticeSession
             key={session.id}
             sessionId={session.id}

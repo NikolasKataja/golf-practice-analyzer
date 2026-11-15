@@ -1,53 +1,55 @@
-import { getCsrfToken, getError } from './auth'
+import { getCsrfToken, getError } from "./auth";
 
 export type CsvPreview = {
-    shotCount: number
-    clubs: string[]
-    shots: {
-        shotNumber: number
-        club: string
-        carry: number
-        carrySide: number
-    }[]
-}
+  shotCount: number;
+  clubs: string[];
+  shots: {
+    shotNumber: number;
+    club: string;
+    carry: number;
+    carrySide: number;
+  }[];
+};
 
 export type ImportedPracticeSession = {
-  id: number
-  name: string
-  practiceDate: string
-  shotCount: number
-}
+  id: number;
+  name: string;
+  practiceDate: string;
+  shotCount: number;
+};
 
 async function postCsv<T>(path: string, formData: FormData): Promise<T> {
-  const token = await getCsrfToken()
+  const token = await getCsrfToken();
 
   const response = await fetch(`/api/practice-sessions/import${path}`, {
-    method: 'POST',
-    headers: { 'X-CSRF-Token': token },
+    method: "POST",
+    headers: { "X-CSRF-Token": token },
     // Let the browser set Content-Type and the multipart boundary.
     body: formData,
-  })
+  });
 
   if (response.status === 401) {
-    throw new Error('Your session has expired. Sign in again to import a file.')
+    throw new Error(
+      "Your session has expired. Sign in again to import a file.",
+    );
   }
 
   if (response.status === 413) {
-    throw new Error('This file is too large. Choose a smaller CSV file.')
+    throw new Error("This file is too large. Choose a smaller CSV file.");
   }
 
   if (!response.ok) {
-    throw new Error(await getError(response))
+    throw new Error(await getError(response));
   }
 
-  return response.json()
+  return response.json();
 }
 
 export function previewCsv(file: File): Promise<CsvPreview> {
-  const formData = new FormData()
-  formData.append('file', file)
+  const formData = new FormData();
+  formData.append("file", file);
 
-  return postCsv<CsvPreview>('/preview', formData)
+  return postCsv<CsvPreview>("/preview", formData);
 }
 
 export function importCsv(
@@ -55,95 +57,95 @@ export function importCsv(
   name: string,
   practiceDate: string,
 ): Promise<ImportedPracticeSession> {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('name', name)
-  formData.append('practiceDate', practiceDate)
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("name", name);
+  formData.append("practiceDate", practiceDate);
 
-  return postCsv<ImportedPracticeSession>('', formData)
+  return postCsv<ImportedPracticeSession>("", formData);
 }
 
 export type PracticeSessionSummary = {
-  id: number
-  name: string
-  practiceDate: string
-  shotCount: number
-}
+  id: number;
+  name: string;
+  practiceDate: string;
+  shotCount: number;
+};
 
 export async function getPracticeSessions(
   signal?: AbortSignal,
 ): Promise<PracticeSessionSummary[]> {
-  const response = await fetch('/api/practice-sessions', {
+  const response = await fetch("/api/practice-sessions", {
     signal,
-    cache: 'no-store'
-  })
+    cache: "no-store",
+  });
 
   if (!response.ok) {
-    throw new Error(await getError(response))
+    throw new Error(await getError(response));
   }
-  return response.json()
+  return response.json();
 }
 
 export type CreateShotRequest = {
-  club: string
-  carry: number
-  carrySide: number
-  ballSpeed: number | null
-  launchAngle: number | null
-  peakHeight: number | null
-  totalDistance: number | null
-}
+  club: string;
+  carry: number;
+  carrySide: number;
+  ballSpeed: number | null;
+  launchAngle: number | null;
+  peakHeight: number | null;
+  totalDistance: number | null;
+};
 
 export type CreatePracticeSessionRequest = {
-  name: string
-  practiceDate: string
-  shots: CreateShotRequest[]
-}
+  name: string;
+  practiceDate: string;
+  shots: CreateShotRequest[];
+};
 
 export async function createPracticeSession(
   request: CreatePracticeSessionRequest,
 ): Promise<PracticeSessionSummary> {
-  const token = await getCsrfToken()
+  const token = await getCsrfToken();
 
-  const response = await fetch('/api/practice-sessions', {
-    method: 'POST',
+  const response = await fetch("/api/practice-sessions", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': token,
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
     },
     body: JSON.stringify(request),
-  })
+  });
 
   if (response.status === 401) {
-    throw new Error('Your session has expired. Sign in again.')
+    throw new Error("Your session has expired. Sign in again.");
   }
 
   if (!response.ok) {
-    throw new Error(await getError(response))
+    throw new Error(await getError(response));
   }
 
-  return response.json()
+  return response.json();
 }
 
 export type PracticeSessionShot = {
-  id: number
-  shotNumber: number
-  shotAt: string | null
-  club: string
-  carry: number
-  carrySide: number
-  ballSpeed: number | null
-  launchAngle: number | null
-  peakHeight: number | null
-  totalDistance: number | null
-}
+  id: number;
+  shotNumber: number;
+  shotAt: string | null;
+  club: string;
+  carry: number;
+  carrySide: number;
+  ballSpeed: number | null;
+  launchAngle: number | null;
+  peakHeight: number | null;
+  totalDistance: number | null;
+};
 
 export type PracticeSessionDetails = {
-  id: number
-  name: string
-  practiceDate: string
-  shots: PracticeSessionShot[]
-}
+  id: number;
+  name: string;
+  practiceDate: string;
+  shots: PracticeSessionShot[];
+};
 
 export async function getPracticeSession(
   id: number,
@@ -151,80 +153,114 @@ export async function getPracticeSession(
 ): Promise<PracticeSessionDetails> {
   const response = await fetch(`/api/practice-sessions/${id}`, {
     signal,
-    cache: 'no-store',
-  })
+    cache: "no-store",
+  });
 
   if (response.status === 404) {
-    throw new Error('Practice session not found.')
+    throw new Error("Practice session not found.");
   }
 
   if (response.status === 401) {
-    throw new Error('Your session has expired. Sign in again.')
+    throw new Error("Your session has expired. Sign in again.");
   }
 
   if (!response.ok) {
-    throw new Error(await getError(response))
+    throw new Error(await getError(response));
   }
 
-  return response.json()
+  return response.json();
 }
 
 export type UpdatePracticeSessionRequest = {
-  name: string
-  practiceDate: string
-}
+  name: string;
+  practiceDate: string;
+};
 
 export async function updatePracticeSession(
   id: number,
   request: UpdatePracticeSessionRequest,
 ): Promise<void> {
-  const token = await getCsrfToken()
+  const token = await getCsrfToken();
 
   const response = await fetch(`/api/practice-sessions/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': token,
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
     },
     body: JSON.stringify(request),
-  })
+  });
 
   if (response.status === 401) {
-    throw new Error('Your session has expired. Sign in again.')
+    throw new Error("Your session has expired. Sign in again.");
   }
 
   if (response.status === 404) {
-    throw new Error('Practice session not found.')
+    throw new Error("Practice session not found.");
   }
 
   if (!response.ok) {
-    throw new Error(await getError(response))
+    throw new Error(await getError(response));
   }
 
   // A successful update returns 204 with no response body.
 }
 
 export async function deletePracticeSession(id: number): Promise<void> {
-  const token = await getCsrfToken()
+  const token = await getCsrfToken();
 
   const response = await fetch(`/api/practice-sessions/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: {
-      'X-CSRF-Token': token,
+      "X-CSRF-Token": token,
     },
-  })
+  });
 
   if (response.status === 401) {
-    throw new Error('Your session has expired. Sign in again.')
+    throw new Error("Your session has expired. Sign in again.");
   }
 
   if (response.status === 404) {
-    throw new Error('Practice session not found.')
+    throw new Error("Practice session not found.");
   }
 
   if (!response.ok) {
-    throw new Error(await getError(response))
+    throw new Error(await getError(response));
   }
 
   // A successful deletion returns 204 with no response body.
+}
+
+export async function updateShot(
+  sessionId: number,
+  shotId: number,
+  request: CreateShotRequest,
+): Promise<PracticeSessionShot> {
+  const token = await getCsrfToken();
+
+  const response = await fetch(
+    `/api/practice-sessions/${sessionId}/shots/${shotId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": token,
+      },
+      body: JSON.stringify(request),
+    },
+  );
+
+  if (response.status === 401) {
+    throw new Error("Your session has expired. Sign in again.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Shot not found.");
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response));
+  }
+
+  return response.json();
 }
