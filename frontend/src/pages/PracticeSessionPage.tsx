@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import { getPracticeSession } from "../api/practiceSessions";
 import type { PracticeSessionDetails } from "../api/practiceSessions";
 import EditPracticeSessionForm from "../components/practiceSessions/EditPracticeSessionForm";
+import DeletePracticeSession from "../components/practiceSessions/DeletePracticeSession";
 
 function formatSide(value: number) {
   if (value === 0) return "On target line";
@@ -20,11 +21,13 @@ export default function PracticeSessionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadSession() {
+      setIsDeleted(false);
       setIsLoading(true);
       setError("");
       setSession(null);
@@ -63,6 +66,16 @@ export default function PracticeSessionPage() {
 
     return () => controller.abort();
   }, [id, retryKey]);
+
+  if (isDeleted && session) {
+    return (
+      <main>
+        <h1>Practice session</h1>
+        <p role="status">Practice session deleted.</p>
+        <Link to="/dashboard">Back to dashboard</Link>
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -168,6 +181,13 @@ export default function PracticeSessionPage() {
               </details>
             </>
           )}
+          <DeletePracticeSession
+            key={session.id}
+            sessionId={session.id}
+            sessionName={session.name}
+            shotCount={session.shots.length}
+            onDeleted={() => setIsDeleted(true)}
+          />
         </>
       ) : null}
     </main>

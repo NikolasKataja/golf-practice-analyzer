@@ -203,3 +203,28 @@ export async function updatePracticeSession(
 
   // A successful update returns 204 with no response body.
 }
+
+export async function deletePracticeSession(id: number): Promise<void> {
+  const token = await getCsrfToken()
+
+  const response = await fetch(`/api/practice-sessions/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'X-CSRF-Token': token,
+    },
+  })
+
+  if (response.status === 401) {
+    throw new Error('Your session has expired. Sign in again.')
+  }
+
+  if (response.status === 404) {
+    throw new Error('Practice session not found.')
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response))
+  }
+
+  // A successful deletion returns 204 with no response body.
+}

@@ -374,4 +374,47 @@ public class PracticeSessionsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(
+    int id,
+    CancellationToken cancellationToken
+)
+    {
+        try
+        {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        // Only load a session owned by the authenticated user.
+        var session = await _dbContext.PracticeSessions
+            .SingleOrDefaultAsync(
+                session => session.Id == id && session.UserId == user.Id,
+                cancellationToken
+            );
+
+        if (session is null)
+        {
+            return NotFound(new { message = "Practice session not found." });
+        }
+
+        // The database cascade rule deletes the related shots.
+        // The shots do not need to be loaded into memory.
+        _dbContext.PracticeSessions.Remove(session);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
+    }
 }
