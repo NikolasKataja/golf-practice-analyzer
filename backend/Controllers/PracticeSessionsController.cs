@@ -482,4 +482,49 @@ public class PracticeSessionsController : ControllerBase
             shot.TotalDistance
         });
     }
+
+    [HttpDelete("{id:int}/shots/{shotId:int}")]
+    public async Task<IActionResult> DeleteShot(
+    int id,
+    int shotId,
+    CancellationToken cancellationToken
+)
+    {
+        try
+        {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        // Check the shot, its session and ownership in the same query.
+        var shot = await _dbContext.Shots
+            .SingleOrDefaultAsync(
+                shot => shot.Id == shotId
+                    && shot.PracticeSessionId == id
+                    && shot.PracticeSession.UserId == user.Id,
+                cancellationToken
+            );
+
+        if (shot is null)
+        {
+            return NotFound(new { message = "Shot not found." });
+        }
+
+        // Delete only this shot. Keep the session and other shot numbers.
+        _dbContext.Shots.Remove(shot);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
+    }
 }

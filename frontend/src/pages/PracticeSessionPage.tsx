@@ -5,6 +5,7 @@ import type { PracticeSessionDetails } from "../api/practiceSessions";
 import EditPracticeSessionForm from "../components/practiceSessions/EditPracticeSessionForm";
 import DeletePracticeSession from "../components/practiceSessions/DeletePracticeSession";
 import EditShotForm from "../components/practiceSessions/EditShotForm";
+import DeleteShotButton from "../components/practiceSessions/DeleteShotButton";
 
 function formatSide(value: number) {
   if (value === 0) return "On target line";
@@ -147,16 +148,41 @@ export default function PracticeSessionPage() {
                         <td>{shot.carry}</td>
                         <td>{formatSide(shot.carrySide)}</td>
                         <td>
-                          <button
-                            type="button"
-                            disabled={editingShotId !== null}
-                            onClick={() => {
-                              setShotMessage("");
-                              setEditingShotId(shot.id);
-                            }}
-                          >
-                            Edit shot
-                          </button>
+                          <td>
+                            <button
+                              type="button"
+                              disabled={editingShotId !== null}
+                              onClick={() => {
+                                setShotMessage("");
+                                setEditingShotId(shot.id);
+                              }}
+                            >
+                              Edit shot
+                            </button>
+
+                            <DeleteShotButton
+                              sessionId={session.id}
+                              shotId={shot.id}
+                              shotNumber={shot.shotNumber}
+                              disabled={editingShotId !== null}
+                              onDeleted={() => {
+                                setSession((current) =>
+                                  current
+                                    ? {
+                                        ...current,
+                                        shots: current.shots.filter(
+                                          (item) => item.id !== shot.id,
+                                        ),
+                                      }
+                                    : current,
+                                );
+
+                                setShotMessage(
+                                  `Shot ${shot.shotNumber} deleted.`,
+                                );
+                              }}
+                            />
+                          </td>
                         </td>
                       </tr>
                     ))}

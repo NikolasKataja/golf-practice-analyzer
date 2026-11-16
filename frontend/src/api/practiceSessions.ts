@@ -264,3 +264,32 @@ export async function updateShot(
 
   return response.json();
 }
+
+export async function deleteShot(
+  sessionId: number,
+  shotId: number,
+): Promise<void> {
+  const token = await getCsrfToken();
+
+  const response = await fetch(
+    `/api/practice-sessions/${sessionId}/shots/${shotId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "X-CSRF-Token": token,
+      },
+    },
+  );
+
+  if (response.status === 401) {
+    throw new Error("Your session has expired. Sign in again.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Shot not found.");
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response));
+  }
+}
