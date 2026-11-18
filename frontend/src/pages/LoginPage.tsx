@@ -1,17 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Navigate, useNavigate, Link, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import AuthLayout from "../components/auth/AuthLayout";
+import AuthInput from "../components/auth/AuthInput";
 import GolfBall from "../components/3d/GolfBall";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-
   const location = useLocation();
 
-  // Read optional navigation feedback without assuming its structure
+  // Read optional navigation feedback without assuming its structure.
   const routeState: unknown = location.state;
   const successMessage =
     typeof routeState === "object" &&
@@ -21,20 +21,23 @@ export default function LoginPage() {
       ? routeState.message
       : null;
 
-  // Form values and submission feedback belong to this page
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const submitting = useRef(false);
 
-  // Signed-in users do not need to see the login form
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    // Handle submission without reloading the browser page
     event.preventDefault();
+
+    // Prevent rapid repeated submissions.
+    if (submitting.current) return;
+
+    submitting.current = true;
     setError("");
     setIsSubmitting(true);
 
@@ -42,11 +45,11 @@ export default function LoginPage() {
       await login(email.trim(), password);
       setPassword("");
 
-      // Replace the login entry in browser history
       navigate("/dashboard", { replace: true });
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Sign-in failed.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-in failed.");
     } finally {
+      submitting.current = false;
       setIsSubmitting(false);
     }
   }
@@ -61,36 +64,38 @@ export default function LoginPage() {
         </p>
       }
     >
-      {successMessage && !error && <p role="status">{successMessage}</p>}
+      {successMessage && !error && (
+        <p role="status">{successMessage}</p>
+      )}
 
       <form onSubmit={handleSubmit} aria-busy={isSubmitting}>
         <fieldset disabled={isSubmitting}>
-          <legend className="auth-layout__legend">Sign-in details</legend>
+          <legend className="auth-layout__legend">
+            Sign-in details
+          </legend>
 
-          <p>
-            <label htmlFor="login-email">Email</label>
-            <input
-              id="login-email"
-              type="email"
-              autoComplete="username"
-              maxLength={256}
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </p>
+          <AuthInput
+            id="login-email"
+            label="Email"
+            type="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            maxLength={256}
+            required
+            value={email}
+            onChange={(event) => setEmail(event.currentTarget.value)}
+          />
 
-          <p>
-            <label htmlFor="login-password">Password</label>
-            <input
-              id="login-password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </p>
+          <AuthInput
+            id="login-password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.currentTarget.value)}
+          />
 
           {error && <p role="alert">{error}</p>}
 

@@ -1,29 +1,35 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Backgrounds */
-  --color-background: #15181c;
-  --color-surface: #20252b;
-  --color-input: #171c21;
+  /* Backgrounds: warm cream */
+  --color-background: #eee5d4;
+  --color-surface: #f8f3e9;
+  --color-input: #fffdf8;
 
   /* Text */
-  --color-text: #f2f5f8;
-  --color-text-muted: #b5bec8;
+  --color-text: #1d4a35;
+  --color-text-muted: #596052;
 
-  /* Primary action: inspired by the golf ball material */
-  --color-primary: #0991e7;
-  --color-primary-hover: #30a6f0;
-  --color-on-primary: #101820;
+  /* Secondary accent: forest green */
+  --color-secondary: #1d4a35;
+  --color-on-secondary: #eee5d4;
+
+  /* Primary actions: orange-red */
+  --color-primary: #f2462e;
+  --color-primary-hover: #de3923;
+  --color-on-primary: #231b16;
 
   /* Links and keyboard focus */
-  --color-link: #70c5ff;
-  --color-focus: #70c5ff;
+  --color-link: #1d4a35;
+  --color-focus: #1d4a35;
 
-  /* Boundaries and feedback */
-  --color-border: #788592;
-  --color-divider: #3b444e;
-  --color-error: #ffaaaa;
-  --color-success: #8cdeb0;
+  /* Boundaries */
+  --color-border: #817b6d;
+  --color-divider: #d3c9b7;
+
+  /* Feedback */
+  --color-error: #a5261d;
+  --color-success: #1d4a35;
 
   /* Typography */
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",

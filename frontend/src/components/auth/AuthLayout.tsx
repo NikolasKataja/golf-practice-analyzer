@@ -17,28 +17,32 @@ export default function AuthLayout({
   return (
     <main className="auth-layout">
       <div className="auth-layout__content">
-        {/* Show the app name above the shared authentication card. */}
-        <p className="auth-layout__brand">Golf Practice Analyzer</p>
-
-        <div className="auth-layout__card">
-          {/* The ball is decorative and does not need a screen reader label. */}
+        <section
+          className="auth-layout__card"
+          aria-labelledby="auth-title"
+        >
+          {/* Keep the decorative 3D visual separate from form content. */}
           {visual && (
-            <div className="auth-layout__visual-panel" aria-hidden="true">
-              <div className="auth-layout__visual">{visual}</div>
+            <div className="auth-layout__visual" aria-hidden="true">
+              {visual}
             </div>
           )}
 
-          <section
-            className="auth-layout__panel"
-            aria-labelledby="auth-title"
-          >
+          <header className="auth-layout__header">
+            <p className="auth-layout__brand">
+              Golf Practice Analyzer
+            </p>
             <h1 id="auth-title">{title}</h1>
+          </header>
 
+          <div className="auth-layout__panel">
             {children}
+          </div>
 
-            <div className="auth-layout__footer">{footer}</div>
-          </section>
-        </div>
+          <footer className="auth-layout__footer">
+            {footer}
+          </footer>
+        </section>
       </div>
     </main>
   );
