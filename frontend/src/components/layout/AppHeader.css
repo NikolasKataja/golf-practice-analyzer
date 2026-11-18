@@ -5,7 +5,7 @@
 
 .app-header__inner {
   box-sizing: border-box;
-  max-width: var(--width-content, 75rem);
+  max-width: none;
   min-height: 4.5rem;
   margin-inline: auto;
   padding: 0.5rem clamp(1rem, 4vw, 2rem);

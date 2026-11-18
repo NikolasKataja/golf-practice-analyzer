@@ -1,0 +1,86 @@
+.add-session-menu {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  align-self: flex-start;
+}
+
+.add-session-menu__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-small);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.add-session-menu__trigger::-webkit-details-marker {
+  display: none;
+}
+
+.add-session-menu__trigger:hover,
+.add-session-menu[open] > .add-session-menu__trigger {
+  background: var(--color-primary-hover);
+}
+
+.add-session-menu__panel {
+  box-sizing: border-box;
+  padding: var(--space-2);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(29 74 53 / 12%);
+}
+
+.add-session-menu__panel ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.add-session-menu__panel a {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-small);
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.add-session-menu__panel a:hover,
+.add-session-menu__panel a:focus-visible {
+  background: var(--color-background);
+}
+
+.add-session-menu__panel a:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.add-session-menu__panel a span {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.add-session-menu__trigger:focus-visible,
+.add-session-menu__panel a:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.add-session-menu__panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1;
+  width: min(20rem, calc(100vw - 2rem));
+  margin-top: var(--space-2);
+}
