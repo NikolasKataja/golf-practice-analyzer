@@ -1,11 +1,14 @@
 import { Link } from 'react-router'
 import PracticeSessionList from '../components/practiceSessions/PracticeSessionList'
 import AddPracticeSessionMenu from '../components/practiceSessions/AddPracticeSessionMenu'
+import AppHeader from "../components/layout/AppHeader";
 
 export default function DashboardPage() {
   return (
-    <main>
-      <h1>Dashboard</h1>
+    <>
+      <AppHeader />
+      <main>
+        <h1>Dashboard</h1>
 
       <nav aria-label="Dashboard navigation">
         <p>
@@ -16,5 +19,6 @@ export default function DashboardPage() {
       <AddPracticeSessionMenu />
       <PracticeSessionList />
     </main>
+    </>
   )
 }

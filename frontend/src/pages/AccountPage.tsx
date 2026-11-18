@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router' 
 import { useAuth } from '../hooks/useAuth'
 import DeleteAccountForm from '../components/auth/DeleteAccountForm'
+import AppHeader from "../components/layout/AppHeader";
 
 export default function AccountPage() {
   const { user, logout } = useAuth()
@@ -27,8 +28,10 @@ export default function AccountPage() {
   }
 
   return (
-    <main>
-      <h1>Your account</h1>
+    <>
+      <AppHeader />
+      <main>
+        <h1>Your account</h1>
       <p>Signed in as {user?.email}</p>
 
       <button disabled={isSubmitting} onClick={handleLogout}>
@@ -43,5 +46,6 @@ export default function AccountPage() {
 
       <DeleteAccountForm disabled={isSubmitting} />
     </main>
+    </>
   )
 }
