@@ -55,7 +55,7 @@ export default function App() {
         />
       </Route>
       <Route element={<ProtectedRoute />}>
-        <Route path="/practice-sessions/:id" element={<PracticeSessionPage />} />
+        <Route path="/practice-sessions/:sessionId" element={<PracticeSessionPage />} />
       </Route>
       
 
