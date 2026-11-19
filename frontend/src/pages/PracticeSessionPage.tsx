@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 import { getPracticeSession } from "../api/practiceSessions";
 import type { PracticeSessionDetails } from "../api/practiceSessions";
 import EditPracticeSessionForm from "../components/practiceSessions/EditPracticeSessionForm";
@@ -19,6 +19,8 @@ function formatMetric(value: number | null) {
 
 export default function PracticeSessionPage() {
   const { id } = useParams();
+  const { search } = useLocation();
+  const startInEditMode = new URLSearchParams(search).get("edit") === "true";
   const [session, setSession] = useState<PracticeSessionDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -114,6 +116,7 @@ export default function PracticeSessionPage() {
             sessionId={session.id}
             initialName={session.name}
             initialDate={session.practiceDate}
+            startInEditMode={startInEditMode}
             onSaved={(details) =>
               setSession((current) =>
                 current ? { ...current, ...details } : current,

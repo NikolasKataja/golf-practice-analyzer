@@ -7,6 +7,7 @@ type Props = {
   sessionId: number
   initialName: string
   initialDate: string
+  startInEditMode?: boolean
   onSaved: (details: UpdatePracticeSessionRequest) => void
 }
 
@@ -14,9 +15,10 @@ export default function EditPracticeSessionForm({
   sessionId,
   initialName,
   initialDate,
+  startInEditMode = false,
   onSaved,
 }: Props) {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(startInEditMode)
   const [name, setName] = useState(initialName)
   const [practiceDate, setPracticeDate] = useState(initialDate)
   const [isSaving, setIsSaving] = useState(false)
