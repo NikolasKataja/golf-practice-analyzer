@@ -4,12 +4,14 @@ import ManualShotRow from './ManualShotRow'
 import type { ManualShotDraft } from './ManualShotRow'
 import { updateShot } from '../../api/practiceSessions'
 import type { PracticeSessionShot } from '../../api/practiceSessions'
+import styles from './PracticeSessionList.module.css'
 
 type Props = {
   sessionId: number
   shot: PracticeSessionShot
   onSaved: (shot: PracticeSessionShot) => void
   onCancel: () => void
+  onSavingChange?: (isSaving: boolean) => void
 }
 
 function createDraft(shot: PracticeSessionShot): ManualShotDraft {
@@ -43,6 +45,7 @@ export default function EditShotForm({
   shot,
   onSaved,
   onCancel,
+  onSavingChange,
 }: Props) {
   const [draft, setDraft] = useState(() => createDraft(shot))
   const [isSaving, setIsSaving] = useState(false)
@@ -56,6 +59,7 @@ export default function EditShotForm({
 
     saving.current = true
     setIsSaving(true)
+    onSavingChange?.(true)
     setError('')
 
     try {
@@ -82,16 +86,17 @@ export default function EditShotForm({
     } finally {
       saving.current = false
       setIsSaving(false)
+      onSavingChange?.(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className={styles.editShotForm} onSubmit={handleSubmit}>
       <fieldset disabled={isSaving}>
         <legend>Edit shot {shot.shotNumber}</legend>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table>
+        <div className={styles.editShotTableContainer}>
+          <table className={styles.editShotTable}>
             <caption>Change the shot measurements before saving</caption>
             <thead>
               <tr>
@@ -116,10 +121,12 @@ export default function EditShotForm({
           </table>
         </div>
 
-        <button type="submit">Save shot</button>
-        <button type="button" onClick={onCancel}>
-          Cancel
-        </button>
+        <div className={styles.editShotActions}>
+          <button className={styles.cancelButton} type="button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit">Save changes</button>
+        </div>
       </fieldset>
 
       {isSaving && <p role="status">Saving shot…</p>}

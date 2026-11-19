@@ -4,6 +4,19 @@
   padding: var(--space-6) clamp(1rem, 4vw, 2rem) var(--space-7);
 }
 
+.practice-session-page__details {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.practice-session-page__intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
 .practice-session-page__intro h1 {
   margin: 0;
   color: var(--color-secondary);
@@ -13,9 +26,45 @@
   overflow-wrap: anywhere;
 }
 
+.practice-session-page__edit-toggle {
+  min-height: 2.25rem;
+  padding: var(--space-2) var(--space-3);
+  white-space: nowrap;
+}
+
 .practice-session-page__date {
   margin: var(--space-2) 0 0;
   color: var(--color-text-muted);
+}
+
+.practice-session-page__edit-form {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.practice-session-page__edit-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--space-4);
+}
+
+.practice-session-page__edit-legend,
+.practice-session-page__edit-actions {
+  grid-column: 1 / -1;
+}
+
+.practice-session-page__edit-fields > p {
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+}
+
+.practice-session-page__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.practice-session-page__edit-form > p {
+  margin: var(--space-3) 0 0;
 }
 
 .practice-session-page__message {
@@ -25,4 +74,14 @@
 
 .practice-session-page__message[role="alert"] {
   color: var(--color-error);
+}
+
+@media (max-width: 40rem) {
+  .practice-session-page__intro {
+    align-items: flex-start;
+  }
+
+  .practice-session-page__edit-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
