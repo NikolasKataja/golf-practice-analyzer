@@ -189,7 +189,7 @@ button:hover:not(:disabled) {
   background-color: var(--color-surface);
 }
 
-/* Show keyboard users which element currently has focus. */
+/* Use one consistent focus indicator across the application. */
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 0px;

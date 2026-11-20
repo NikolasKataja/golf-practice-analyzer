@@ -133,12 +133,6 @@
   border-color: var(--color-secondary);
 }
 
-.auth-layout__panel .auth-input__control input:focus-visible {
-  border-color: var(--color-focus);
-  outline: 2px solid var(--color-focus);
-  outline-offset: 0px;
-}
-
 /* Override shared button styling only for the password visibility control. */
 .auth-layout__panel .auth-input__toggle {
   position: absolute;
@@ -192,12 +186,6 @@
 
 .auth-layout__panel button[type="submit"]:not(:disabled):hover {
   background: var(--color-primary-hover);
-}
-
-.auth-layout__panel button:focus-visible,
-.auth-layout__footer a:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 3px;
 }
 
 .auth-layout__panel fieldset:disabled input,

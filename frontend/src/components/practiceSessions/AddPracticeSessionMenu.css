@@ -55,8 +55,7 @@
   text-decoration: none;
 }
 
-.add-session-menu__panel a:hover,
-.add-session-menu__panel a:focus-visible {
+.add-session-menu__panel a:hover {
   background: var(--color-background);
 }
 
@@ -68,12 +67,6 @@
 .add-session-menu__panel a span {
   color: var(--color-text-muted);
   font-size: 0.875rem;
-}
-
-.add-session-menu__trigger:focus-visible,
-.add-session-menu__panel a:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
 }
 
 .add-session-menu__panel {
