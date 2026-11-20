@@ -1,0 +1,121 @@
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 650;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.filter select {
+  width: auto;
+  min-width: 9rem;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.chartContainer {
+  width: 100%;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.grid {
+  stroke: var(--color-divider);
+  stroke-width: 1;
+}
+
+.targetLine {
+  stroke: var(--color-secondary);
+  stroke-dasharray: 6 5;
+  stroke-width: 1.5;
+}
+
+.axis {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.tick {
+  fill: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.axisLabel {
+  fill: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.point {
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  padding: 0 1.25rem 1rem;
+  list-style: none;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.legendSwatch {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+}
+
+.message {
+  margin: 0;
+  padding: 0 1.25rem 1.25rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 32rem) {
+  .header {
+    align-items: flex-start;
+  }
+
+  .filter {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

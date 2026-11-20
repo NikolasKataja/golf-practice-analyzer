@@ -36,8 +36,45 @@
   min-width: 0;
 }
 
+.dashboard__analysis {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-4);
+}
+
+.dashboard__session-select {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.dashboard__session-select select {
+  width: auto;
+  min-width: min(18rem, 100%);
+}
+
+.dashboard__message {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.dashboard__error {
+  color: var(--color-error);
+}
+
 @media (max-width: 40rem) {
   .dashboard__intro {
     flex-direction: column;
+  }
+
+  .dashboard__session-select {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .dashboard__session-select select {
+    width: 100%;
   }
 }

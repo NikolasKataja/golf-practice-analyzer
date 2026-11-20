@@ -1,7 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { createPortal } from "react-dom";
-import { getPracticeSessions } from "../../api/practiceSessions";
 import {
   deletePracticeSession,
   type PracticeSessionSummary,
@@ -195,47 +194,21 @@ function SessionActions({ session, onDeleted }: SessionActionsProps) {
   );
 }
 
-export default function PracticeSessionList() {
-  const [sessions, setSessions] = useState<PracticeSessionSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
+type PracticeSessionListProps = {
+  sessions: PracticeSessionSummary[];
+  isLoading: boolean;
+  error: string;
+  onRefresh: () => void;
+  onDeleted: (sessionId: number) => void;
+};
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadSessions() {
-      setIsLoading(true);
-      setError("");
-
-      try {
-        const data = await getPracticeSessions(controller.signal);
-
-        if (!controller.signal.aborted) {
-          setSessions(data);
-        }
-      } catch (err) {
-        // Leaving the page cancels the request without showing an error.
-        if (!controller.signal.aborted) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Could not load practice sessions.",
-          );
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadSessions();
-
-    // Cancel the request when the component unmounts or the effect restarts.
-    return () => controller.abort();
-  }, [refreshKey]);
-
+export default function PracticeSessionList({
+  sessions,
+  isLoading,
+  error,
+  onRefresh,
+  onDeleted,
+}: PracticeSessionListProps) {
   return (
     <section
       className={styles.card}
@@ -248,7 +221,7 @@ export default function PracticeSessionList() {
           className={styles.refreshButton}
           type="button"
           disabled={isLoading}
-          onClick={() => setRefreshKey((current) => current + 1)}
+          onClick={onRefresh}
         >
           Refresh
         </button>
@@ -304,11 +277,7 @@ export default function PracticeSessionList() {
                   <td className={styles.actionsCell}>
                     <SessionActions
                       session={session}
-                      onDeleted={(sessionId) =>
-                        setSessions((current) =>
-                          current.filter((item) => item.id !== sessionId),
-                        )
-                      }
+                      onDeleted={onDeleted}
                     />
                   </td>
                 </tr>
