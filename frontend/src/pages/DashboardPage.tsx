@@ -7,6 +7,7 @@ import {
 } from "../api/practiceSessions";
 import PracticeSessionList from "../components/practiceSessions/PracticeSessionList";
 import ShotDispersionChart from "../components/practiceSessions/ShotDispersionChart";
+import ShotDirection from "../components/practiceSessions/ShotDirection";
 import AddPracticeSessionMenu from "../components/practiceSessions/AddPracticeSessionMenu";
 import AppHeader from "../components/layout/AppHeader";
 import "./DashboardPage.css";
@@ -39,9 +40,11 @@ export default function DashboardPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [sessionListResult, setSessionListResult] =
     useState<SessionListResult | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
-    null,
-  );
+  const [selection, setSelection] = useState<{
+    sessionId: number | null;
+    club: string;
+  }>({ sessionId: null, club: "" });
+  const selectedSessionId = selection.sessionId;
   const [details, setDetails] = useState<DetailsState | null>(null);
   const isLoadingSessions =
     sessionListResult === null || sessionListResult.refreshKey !== refreshKey;
@@ -57,11 +60,17 @@ export default function DashboardPage() {
         if (controller.signal.aborted) return;
 
         setSessionListResult({ refreshKey, sessions: data, error: "" });
-        setSelectedSessionId((current) =>
-          current !== null && data.some((session) => session.id === current)
-            ? current
-            : newestSession(data)?.id ?? null,
-        );
+        setSelection((current) => {
+          const sessionId =
+            current.sessionId !== null &&
+            data.some((session) => session.id === current.sessionId)
+              ? current.sessionId
+              : newestSession(data)?.id ?? null;
+          return {
+            sessionId,
+            club: sessionId === current.sessionId ? current.club : "",
+          };
+        });
       } catch (error) {
         if (!controller.signal.aborted) {
           setSessionListResult({
@@ -115,11 +124,16 @@ export default function DashboardPage() {
   function handleSessionDeleted(sessionId: number) {
     const remaining = sessions.filter((session) => session.id !== sessionId);
     setSessionListResult({ refreshKey, sessions: remaining, error: "" });
-    setSelectedSessionId((selected) =>
-      selected === sessionId
-        ? newestSession(remaining)?.id ?? null
-        : selected,
-    );
+    setSelection((current) => {
+      const selected =
+        current.sessionId === sessionId
+          ? newestSession(remaining)?.id ?? null
+          : current.sessionId;
+      return {
+        sessionId: selected,
+        club: selected === current.sessionId ? current.club : "",
+      };
+    });
   }
 
   const selectedSession = sessions.find(
@@ -127,6 +141,17 @@ export default function DashboardPage() {
   );
   const selectedDetails =
     details?.sessionId === selectedSessionId ? details : null;
+  const activeSession =
+    selectedDetails?.status === "ready" ? selectedDetails.session : null;
+  const clubs = activeSession
+    ? [...new Set(activeSession.shots.map((shot) => shot.club))].sort((a, b) =>
+        a.localeCompare(b),
+      )
+    : [];
+  const filteredShots =
+    activeSession && selection.club
+      ? activeSession.shots.filter((shot) => shot.club === selection.club)
+      : (activeSession?.shots ?? []);
 
   return (
     <>
@@ -162,7 +187,10 @@ export default function DashboardPage() {
                 <select
                   value={selectedSessionId ?? ""}
                   onChange={(event) =>
-                    setSelectedSessionId(Number(event.currentTarget.value))
+                    setSelection({
+                      sessionId: Number(event.currentTarget.value),
+                      club: "",
+                    })
                   }
                 >
                   {sessions.map((session) => (
@@ -182,10 +210,18 @@ export default function DashboardPage() {
                   {selectedDetails.message}
                 </p>
               ) : (
-                <ShotDispersionChart
-                  key={selectedSession.id}
-                  shots={selectedDetails.session.shots}
-                />
+                <div className="dashboard__charts">
+                  <ShotDispersionChart
+                    key={selectedSession.id}
+                    shots={filteredShots}
+                    clubs={clubs}
+                    selectedClub={selection.club}
+                    onClubChange={(club) =>
+                      setSelection((current) => ({ ...current, club }))
+                    }
+                  />
+                  <ShotDirection shots={filteredShots} />
+                </div>
               )}
             </>
           )}

@@ -42,6 +42,14 @@
   gap: var(--space-4);
 }
 
+.dashboard__charts {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+  align-items: start;
+}
+
 .dashboard__session-select {
   display: flex;
   align-items: center;
@@ -76,5 +84,11 @@
 
   .dashboard__session-select select {
     width: 100%;
+  }
+}
+
+@media (max-width: 56rem) {
+  .dashboard__charts {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

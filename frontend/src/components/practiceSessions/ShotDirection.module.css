@@ -1,0 +1,27 @@
+.content {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.counts {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--color-divider);
+}
+
+.row dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.summary {
+  margin: 1rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}

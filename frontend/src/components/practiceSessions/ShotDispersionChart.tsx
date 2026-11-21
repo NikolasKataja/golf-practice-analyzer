@@ -1,6 +1,6 @@
-import { useState } from "react";
 import type { PracticeSessionShot } from "../../api/practiceSessions";
 import styles from "./ShotDispersionChart.module.css";
+import { TARGET_ZONE_HALF_WIDTH_METERS } from "./targetZone";
 
 const plot = { left: 76, right: 780, top: 24, bottom: 350 };
 
@@ -17,26 +17,31 @@ function formatTick(value: number) {
 
 type Props = {
   shots: PracticeSessionShot[];
+  clubs: string[];
+  selectedClub: string;
+  onClubChange: (club: string) => void;
 };
 
-export default function ShotDispersionChart({ shots }: Props) {
-  const [selectedClub, setSelectedClub] = useState("");
-  const clubs = [...new Set(shots.map((shot) => shot.club))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+export default function ShotDispersionChart({
+  shots,
+  clubs,
+  selectedClub,
+  onClubChange,
+}: Props) {
   const colors = new Map(
     clubs.map((club, index) => [
       club,
       `hsl(${Math.round((index * 137.508) % 360)} 58% 38%)`,
     ]),
   );
-  const visibleShots = selectedClub
-    ? shots.filter((shot) => shot.club === selectedClub)
-    : shots;
+  const visibleShots = shots;
 
-  const maxSide = Math.max(0, ...visibleShots.map((shot) => Math.abs(shot.carrySide)));
-  const xStep = niceStep((maxSide || 1) * 1.1 / 4);
-  const xBound = Math.ceil(((maxSide || 1) * 1.1) / xStep) * xStep;
+  const maxSide = Math.max(
+    TARGET_ZONE_HALF_WIDTH_METERS,
+    ...visibleShots.map((shot) => Math.abs(shot.carrySide)),
+  );
+  const xStep = niceStep((maxSide * 1.1) / 4);
+  const xBound = Math.ceil((maxSide * 1.1) / xStep) * xStep;
   const xTicks = Array.from(
     { length: Math.round((xBound * 2) / xStep) + 1 },
     (_, index) => -xBound + index * xStep,
@@ -72,7 +77,7 @@ export default function ShotDispersionChart({ shots }: Props) {
           <span>Club</span>
           <select
             value={selectedClub}
-            onChange={(event) => setSelectedClub(event.currentTarget.value)}
+            onChange={(event) => onClubChange(event.currentTarget.value)}
             disabled={clubs.length === 0}
           >
             <option value="">All clubs</option>
@@ -96,6 +101,16 @@ export default function ShotDispersionChart({ shots }: Props) {
               role="img"
               aria-label={`Shot dispersion for ${selectedClub || "all clubs"}`}
             >
+              <rect
+                className={styles.targetZone}
+                x={xPosition(-TARGET_ZONE_HALF_WIDTH_METERS)}
+                y={plot.top}
+                width={
+                  xPosition(TARGET_ZONE_HALF_WIDTH_METERS) -
+                  xPosition(-TARGET_ZONE_HALF_WIDTH_METERS)
+                }
+                height={plot.bottom - plot.top}
+              />
               {xTicks.map((tick) => (
                 <g key={`x-${tick}`}>
                   <line
@@ -158,7 +173,12 @@ export default function ShotDispersionChart({ shots }: Props) {
                   className={styles.point}
                 >
                   <title>
-                    {shot.club} · Carry: {shot.carry} m · Side: {shot.carrySide} m
+                    {shot.club} · Carry: {shot.carry} m ·{" "}
+                    {shot.carrySide === 0
+                      ? "0 m on target line"
+                      : `${Math.abs(shot.carrySide)} m ${
+                          shot.carrySide < 0 ? "left" : "right"
+                        }`}
                   </title>
                 </circle>
               ))}

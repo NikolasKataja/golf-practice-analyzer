@@ -1,0 +1,1 @@
+export const TARGET_ZONE_HALF_WIDTH_METERS = 5;

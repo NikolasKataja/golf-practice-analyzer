@@ -52,6 +52,11 @@
   stroke-width: 1;
 }
 
+.targetZone {
+  fill: var(--color-secondary);
+  opacity: 0.08;
+}
+
 .targetLine {
   stroke: var(--color-secondary);
   stroke-dasharray: 6 5;
