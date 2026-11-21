@@ -157,7 +157,7 @@ export default function DashboardPage() {
     <>
       <AppHeader />
 
-      <main className="dashboard">
+      <main className="page-content dashboard">
         <div className="dashboard__intro">
           <div>
             <h1>Practice overview</h1>

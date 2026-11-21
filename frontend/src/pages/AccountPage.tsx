@@ -30,7 +30,7 @@ export default function AccountPage() {
   return (
     <>
       <AppHeader />
-      <main>
+      <main className="page-content">
         <h1>Your account</h1>
       <p>Signed in as {user?.email}</p>
 

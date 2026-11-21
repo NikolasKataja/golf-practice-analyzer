@@ -20,21 +20,21 @@ export default function PracticeSessionPage() {
   const id = Number(sessionId);
 
   return (
-    <main className="practice-session-page">
+    <>
       <AppHeader />
 
       {Number.isSafeInteger(id) && id > 0 ? (
-        <div className="practice-session-page__content">
+        <main className="page-content practice-session-page__content">
           <PracticeSessionContent key={id} id={id} />
-        </div>
+        </main>
       ) : (
-        <div className="practice-session-page__content">
+        <main className="page-content practice-session-page__content">
           <p className="practice-session-page__message" role="alert">
             Practice session not found.
           </p>
-        </div>
+        </main>
       )}
-    </main>
+    </>
   );
 }
 
