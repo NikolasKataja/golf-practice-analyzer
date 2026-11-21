@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import {
   getPracticeSession,
   getPracticeSessions,
@@ -10,6 +11,7 @@ import ShotDispersionChart from "../components/practiceSessions/ShotDispersionCh
 import ShotDirection from "../components/practiceSessions/ShotDirection";
 import AddPracticeSessionMenu from "../components/practiceSessions/AddPracticeSessionMenu";
 import AppHeader from "../components/layout/AppHeader";
+import SuccessToast from "../components/SuccessToast";
 import "./DashboardPage.css";
 
 type DetailsState =
@@ -21,6 +23,49 @@ type SessionListResult = {
   sessions: PracticeSessionSummary[];
   error: string;
 };
+
+type PracticeSessionNotice = {
+  type: "saved" | "imported";
+  sessionId: number;
+  name: string;
+  shotCount: number;
+};
+
+function readPracticeSessionNotice(state: unknown): PracticeSessionNotice | null {
+  if (
+    typeof state !== "object" ||
+    state === null ||
+    !("practiceSessionNotice" in state)
+  ) {
+    return null;
+  }
+
+  const notice = state.practiceSessionNotice;
+  if (
+    typeof notice !== "object" ||
+    notice === null ||
+    !("type" in notice) ||
+    (notice.type !== "saved" && notice.type !== "imported") ||
+    !("sessionId" in notice) ||
+    typeof notice.sessionId !== "number" ||
+    !Number.isInteger(notice.sessionId) ||
+    !("name" in notice) ||
+    typeof notice.name !== "string" ||
+    !("shotCount" in notice) ||
+    typeof notice.shotCount !== "number" ||
+    !Number.isInteger(notice.shotCount) ||
+    notice.shotCount < 0
+  ) {
+    return null;
+  }
+
+  return {
+    type: notice.type,
+    sessionId: notice.sessionId,
+    name: notice.name,
+    shotCount: notice.shotCount,
+  };
+}
 
 function newestSession(sessions: PracticeSessionSummary[]) {
   return sessions.reduce<PracticeSessionSummary | null>((newest, session) => {
@@ -37,19 +82,42 @@ function newestSession(sessions: PracticeSessionSummary[]) {
 }
 
 export default function DashboardPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [notice, setNotice] = useState(() =>
+    readPracticeSessionNotice(location.state),
+  );
   const [refreshKey, setRefreshKey] = useState(0);
   const [sessionListResult, setSessionListResult] =
     useState<SessionListResult | null>(null);
   const [selection, setSelection] = useState<{
     sessionId: number | null;
     club: string;
-  }>({ sessionId: null, club: "" });
+  }>(() => ({
+    sessionId: readPracticeSessionNotice(location.state)?.sessionId ?? null,
+    club: "",
+  }));
   const selectedSessionId = selection.sessionId;
   const [details, setDetails] = useState<DetailsState | null>(null);
   const isLoadingSessions =
     sessionListResult === null || sessionListResult.refreshKey !== refreshKey;
   const sessions = isLoadingSessions ? [] : sessionListResult.sessions;
   const sessionsError = isLoadingSessions ? "" : sessionListResult.error;
+
+  useEffect(() => {
+    if (!readPracticeSessionNotice(location.state)) return;
+
+    void navigate(`${location.pathname}${location.search}${location.hash}`, {
+      replace: true,
+      state: null,
+    });
+  }, [
+    location.hash,
+    location.pathname,
+    location.search,
+    location.state,
+    navigate,
+  ]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -158,6 +226,16 @@ export default function DashboardPage() {
       <AppHeader />
 
       <main className="page-content dashboard">
+        {notice && (
+          <SuccessToast
+            title={`Practice session ${notice.type === "saved" ? "saved" : "imported"}`}
+            message={`${notice.name} · ${notice.shotCount} ${
+              notice.shotCount === 1 ? "shot" : "shots"
+            }`}
+            onDismiss={() => setNotice(null)}
+          />
+        )}
+
         <div className="dashboard__intro">
           <div>
             <h1>Practice overview</h1>

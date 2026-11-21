@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router'
+import { useNavigate } from 'react-router'
+import AppHeader from '../components/layout/AppHeader'
+import cardStyles from '../components/practiceSessions/PracticeSessionList.module.css'
 import ManualShotRow from '../components/practiceSessions/ManualShotRow'
 import type { ManualShotDraft } from '../components/practiceSessions/ManualShotRow'
 import { createPracticeSession } from '../api/practiceSessions'
-import type { PracticeSessionSummary } from '../api/practiceSessions'
+import './PracticeSessionEntryPages.css'
 
 function emptyShot(id: number, club = ''): ManualShotDraft {
   return {
@@ -25,12 +27,12 @@ function optionalNumber(value: string): number | null {
 }
 
 export default function CreatePracticeSessionPage() {
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [practiceDate, setPracticeDate] = useState('')
   const [shots, setShots] = useState<ManualShotDraft[]>([emptyShot(1)])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
-  const [saved, setSaved] = useState<PracticeSessionSummary | null>(null)
   const nextId = useRef(2)
   const saving = useRef(false)
 
@@ -60,7 +62,7 @@ export default function CreatePracticeSessionPage() {
     setError('')
 
     try {
-      const result = await createPracticeSession({
+      const session = await createPracticeSession({
         name: name.trim(),
         practiceDate,
         shots: shots.map((shot) => ({
@@ -79,7 +81,17 @@ export default function CreatePracticeSessionPage() {
         })),
       })
 
-      setSaved(result)
+      navigate('/dashboard', {
+        replace: true,
+        state: {
+          practiceSessionNotice: {
+            type: 'saved',
+            sessionId: session.id,
+            name: session.name,
+            shotCount: session.shotCount,
+          },
+        },
+      })
     } catch (err) {
       // Keep the entered data so the user can correct or retry the request.
       setError(
@@ -92,102 +104,105 @@ export default function CreatePracticeSessionPage() {
   }
 
   return (
-    <main>
-      <Link to="/dashboard">Back to dashboard</Link>
-      <h1>Add practice session manually</h1>
+    <>
+      <AppHeader />
+      <main className="page-content practice-entry">
+        <h1>Add practice session manually</h1>
 
-      {saved ? (
-        <p role="status">
-          Saved “{saved.name}” with {saved.shotCount} shots.
-        </p>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <fieldset disabled={isSaving}>
-            <legend>Practice details</legend>
+        <form
+          className="practice-entry__form"
+          onSubmit={handleSubmit}
+        >
+            <fieldset
+              className="practice-entry__fieldset"
+              disabled={isSaving}
+            >
+              <legend className="practice-entry__visually-hidden">
+                Practice session
+              </legend>
 
-            <p>
-              <label htmlFor="manual-name">Session name</label>
-              <input
-                id="manual-name"
-                required
-                maxLength={150}
-                value={name}
-                onChange={(event) => setName(event.currentTarget.value)}
-              />
-            </p>
-
-            <p>
-              <label htmlFor="manual-date">Practice date</label>
-              <input
-                id="manual-date"
-                type="date"
-                required
-                value={practiceDate}
-                onChange={(event) => setPracticeDate(event.currentTarget.value)}
-              />
-            </p>
-
-            <h2>Shots</h2>
-            <p>
-              Choose a club and enter the carry distance and side at landing
-              for each shot. These fields are required.
-            </p>
-            <p>
-              Carry is the distance to where the ball first lands.
-              Side distance shows how far left or right of the target line
-              it lands.
-            </p>
-
-            <div style={{ overflowX: 'auto' }}>
-              <table>
-                <caption>Shot results — distances in metres</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Shot</th>
-                    <th scope="col">Club</th>
-                    <th scope="col">Carry</th>
-                    <th scope="col">Side</th>
-                    <th scope="col">Optional data</th>
-                    <th scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {shots.map((shot, index) => (
-                    <ManualShotRow
-                      key={shot.id}
-                      shot={shot}
-                      number={index + 1}
-                      canRemove={shots.length > 1}
-                      onChange={(updated) =>
-                        setShots((current) =>
-                          current.map((item) =>
-                            item.id === updated.id ? updated : item,
-                          ),
-                        )
-                      }
-                      onRemove={() =>
-                        setShots((current) =>
-                          current.filter((item) => item.id !== shot.id),
-                        )
+              <section className={cardStyles.card}>
+                <div className={cardStyles.header}>
+                  <h2>Practice details</h2>
+                </div>
+                <div className="practice-entry__fields">
+                  <p>
+                    <label htmlFor="manual-name">Session name</label>
+                    <input
+                      id="manual-name"
+                      required
+                      maxLength={150}
+                      value={name}
+                      onChange={(event) => setName(event.currentTarget.value)}
+                    />
+                  </p>
+                  <p>
+                    <label htmlFor="manual-date">Practice date</label>
+                    <input
+                      id="manual-date"
+                      type="date"
+                      required
+                      value={practiceDate}
+                      onChange={(event) =>
+                        setPracticeDate(event.currentTarget.value)
                       }
                     />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </p>
+                </div>
+              </section>
 
-            <p>
-              <button type="button" onClick={addShot}>Add shot</button>
-            </p>
-            <p>
-              <button type="submit">Save practice session</button>
-            </p>
-          </fieldset>
+              <section className={cardStyles.card}>
+                <div className={cardStyles.header}>
+                  <h2>Shots</h2>
+                </div>
+                <div className="practice-entry__card-content practice-entry__shots">
+                  <p className="practice-entry__shot-help">
+                    Carry is the distance to where the ball first lands.
+                    Side distance shows how far left or right of the target
+                    line it lands.
+                  </p>
+                  <div className="practice-entry__shot-list">
+                    {shots.map((shot, index) => (
+                      <ManualShotRow
+                        key={shot.id}
+                        shot={shot}
+                        number={index + 1}
+                        canRemove={shots.length > 1}
+                        separateMetrics
+                        onChange={(updated) =>
+                          setShots((current) =>
+                            current.map((item) =>
+                              item.id === updated.id ? updated : item,
+                            ),
+                          )
+                        }
+                        onRemove={() =>
+                          setShots((current) =>
+                            current.filter((item) => item.id !== shot.id),
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                  <button
+                    className="button-secondary practice-entry__add-shot"
+                    type="button"
+                    onClick={addShot}
+                  >
+                    Add shot
+                  </button>
+                </div>
+              </section>
 
-          {isSaving && <p role="status">Saving session…</p>}
-          {error && <p role="alert">{error}</p>}
+              <div className="practice-entry__actions">
+                <button type="submit">Save practice session</button>
+              </div>
+            </fieldset>
+
+            {isSaving && <p role="status">Saving session…</p>}
+            {error && <p role="alert">{error}</p>}
         </form>
-      )}
-    </main>
+      </main>
+    </>
   )
 }

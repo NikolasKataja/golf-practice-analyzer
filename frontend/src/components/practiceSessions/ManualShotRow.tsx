@@ -45,6 +45,7 @@ type Props = {
   number: number;
   canRemove: boolean;
   hideRemove?: boolean;
+  separateMetrics?: boolean;
   onChange: (shot: ManualShotDraft) => void;
   onRemove: () => void;
 };
@@ -56,131 +57,246 @@ export default function ManualShotRow({
   onChange,
   onRemove,
   hideRemove = false,
+  separateMetrics = false,
 }: Props) {
   const prefix = `shot-${shot.id}`;
 
-  return (
-    <tr>
-      <th scope="row">{number}</th>
-
-      <td>
-        <label htmlFor={`${prefix}-club`}>Club</label>
-        <select
-          id={`${prefix}-club`}
-          value={shot.club}
-          required
-          onChange={(event) =>
-            onChange({ ...shot, club: event.currentTarget.value })
-          }
-        >
-          <option value="">Choose a club</option>
-          {clubs.map((club) => (
-            <option key={club} value={club}>
-              {club}
-            </option>
-          ))}
-        </select>
-      </td>
-
-      <td>
-        <label htmlFor={`${prefix}-carry`}>Carry (m)</label>
+  function renderAdditionalFields() {
+    return additionalFields.map((field) => (
+      <p key={field.name}>
+        <label htmlFor={`${prefix}-${field.name}`}>{field.label}</label>
         <input
-          id={`${prefix}-carry`}
+          id={`${prefix}-${field.name}`}
           type="number"
-          min="0.001"
+          min={field.min}
           max="9999999.999"
           step="0.001"
-          required
-          value={shot.carry}
+          value={shot[field.name]}
           onChange={(event) =>
-            onChange({ ...shot, carry: event.currentTarget.value })
-          }
-        />
-      </td>
-
-      <td>
-        <label htmlFor={`${prefix}-direction`}>Side at landing</label>
-        <select
-          id={`${prefix}-direction`}
-          required
-          value={shot.direction}
-          onChange={(event) => {
-            const direction = event.currentTarget
-              .value as ManualShotDraft["direction"];
-
             onChange({
               ...shot,
-              direction,
-              // Clear an old distance when the target line is selected.
-              sideDistance: direction === "centre" ? "" : shot.sideDistance,
-            });
-          }}
-        >
-          <option value="">Choose a direction</option>
-          <option value="left">Left</option>
-          <option value="centre">On target line</option>
-          <option value="right">Right</option>
-        </select>
+              [field.name]: event.currentTarget.value,
+            })
+          }
+        />
+      </p>
+    ));
+  }
 
-        {shot.direction !== "centre" && (
-          <>
-            <label htmlFor={`${prefix}-side`}>
-              Distance from target line (m)
-            </label>
+  if (separateMetrics) {
+    return (
+      <section
+        className="practice-entry__shot-group"
+        aria-labelledby={`${prefix}-heading`}
+      >
+        <div className="practice-entry__shot-header">
+          <h3 id={`${prefix}-heading`}>Shot {number}</h3>
+          {!hideRemove && (
+            <button
+              className="practice-entry__remove-shot"
+              type="button"
+              disabled={!canRemove}
+              aria-label={`Remove shot ${number}`}
+              onClick={onRemove}
+            >
+              Remove
+            </button>
+          )}
+        </div>
+
+        <div className="practice-entry__shot-fields">
+          <p>
+            <label htmlFor={`${prefix}-club`}>Club</label>
+            <select
+              id={`${prefix}-club`}
+              value={shot.club}
+              required
+              onChange={(event) =>
+                onChange({ ...shot, club: event.currentTarget.value })
+              }
+            >
+              <option value="">Choose a club</option>
+              {clubs.map((club) => (
+                <option key={club} value={club}>
+                  {club}
+                </option>
+              ))}
+            </select>
+          </p>
+
+          <p>
+            <label htmlFor={`${prefix}-carry`}>Carry (m)</label>
             <input
-              id={`${prefix}-side`}
+              id={`${prefix}-carry`}
               type="number"
               min="0.001"
               max="9999999.999"
               step="0.001"
               required
-              value={shot.sideDistance}
+              value={shot.carry}
               onChange={(event) =>
-                onChange({ ...shot, sideDistance: event.currentTarget.value })
+                onChange({ ...shot, carry: event.currentTarget.value })
               }
             />
-          </>
-        )}
-      </td>
+          </p>
 
-      <td>
-        <details>
-          <summary>Additional metrics (optional)</summary>
+          <p>
+            <label htmlFor={`${prefix}-direction`}>Side at landing</label>
+            <select
+              id={`${prefix}-direction`}
+              required
+              value={shot.direction}
+              onChange={(event) => {
+                const direction = event.currentTarget
+                  .value as ManualShotDraft["direction"];
 
-          {additionalFields.map((field) => (
-            <p key={field.name}>
-              <label htmlFor={`${prefix}-${field.name}`}>{field.label}</label>
+                onChange({
+                  ...shot,
+                  direction,
+                  // Clear an old distance when the target line is selected.
+                  sideDistance: direction === "centre" ? "" : shot.sideDistance,
+                });
+              }}
+            >
+              <option value="">Choose a direction</option>
+              <option value="left">Left</option>
+              <option value="centre">On target line</option>
+              <option value="right">Right</option>
+            </select>
+          </p>
+
+          <p>
+            <label htmlFor={`${prefix}-side`}>
+              Distance from target line (m)
+            </label>
+            {shot.direction === "centre" ? (
+              <span className="practice-entry__field-hint">On target line</span>
+            ) : (
               <input
-                id={`${prefix}-${field.name}`}
+                id={`${prefix}-side`}
                 type="number"
-                min={field.min}
+                min="0.001"
                 max="9999999.999"
                 step="0.001"
-                value={shot[field.name]}
+                required
+                value={shot.sideDistance}
                 onChange={(event) =>
-                  onChange({
-                    ...shot,
-                    [field.name]: event.currentTarget.value,
-                  })
+                  onChange({ ...shot, sideDistance: event.currentTarget.value })
                 }
               />
-            </p>
-          ))}
-        </details>
-      </td>
+            )}
+          </p>
+        </div>
 
-      <td>
-        {!hideRemove && (
-          <button
-            type="button"
-            disabled={!canRemove}
-            aria-label={`Remove shot ${number}`}
-            onClick={onRemove}
+        <details className="practice-entry__additional-metrics">
+          <summary>Additional metrics (optional)</summary>
+          <div className="practice-entry__metrics-fields">
+            {renderAdditionalFields()}
+          </div>
+        </details>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      <tr>
+        <th scope="row">{number}</th>
+
+        <td data-label="Club">
+          <label htmlFor={`${prefix}-club`}>Club</label>
+          <select
+            id={`${prefix}-club`}
+            value={shot.club}
+            required
+            onChange={(event) =>
+              onChange({ ...shot, club: event.currentTarget.value })
+            }
           >
-            Remove
-          </button>
-        )}
-      </td>
-    </tr>
+            <option value="">Choose a club</option>
+            {clubs.map((club) => (
+              <option key={club} value={club}>
+                {club}
+              </option>
+            ))}
+          </select>
+        </td>
+
+        <td data-label="Carry (m)">
+          <label htmlFor={`${prefix}-carry`}>Carry (m)</label>
+          <input
+            id={`${prefix}-carry`}
+            type="number"
+            min="0.001"
+            max="9999999.999"
+            step="0.001"
+            required
+            value={shot.carry}
+            onChange={(event) =>
+              onChange({ ...shot, carry: event.currentTarget.value })
+            }
+          />
+        </td>
+
+        <td data-label="Side at landing">
+          <label htmlFor={`${prefix}-direction`}>Side at landing</label>
+          <select
+            id={`${prefix}-direction`}
+            required
+            value={shot.direction}
+            onChange={(event) => {
+              const direction = event.currentTarget
+                .value as ManualShotDraft["direction"];
+
+              onChange({
+                ...shot,
+                direction,
+                // Clear an old distance when the target line is selected.
+                sideDistance: direction === "centre" ? "" : shot.sideDistance,
+              });
+            }}
+          >
+            <option value="">Choose a direction</option>
+            <option value="left">Left</option>
+            <option value="centre">On target line</option>
+            <option value="right">Right</option>
+          </select>
+          {shot.direction !== "centre" && (
+            <>
+              <label htmlFor={`${prefix}-side`}>
+                Distance from target line (m)
+              </label>
+              <input
+                id={`${prefix}-side`}
+                type="number"
+                min="0.001"
+                max="9999999.999"
+                step="0.001"
+                required
+                value={shot.sideDistance}
+                onChange={(event) =>
+                  onChange({ ...shot, sideDistance: event.currentTarget.value })
+                }
+              />
+            </>
+          )}
+        </td>
+
+        <td data-label="Additional metrics">
+          <details>
+            <summary>Additional metrics (optional)</summary>
+            {renderAdditionalFields()}
+          </details>
+        </td>
+
+        <td data-label="Actions">
+          {!hideRemove && (
+            <button type="button" disabled={!canRemove} onClick={onRemove}>
+              Remove
+            </button>
+          )}
+        </td>
+      </tr>
+    </>
   );
 }
