@@ -81,6 +81,13 @@ function newestSession(sessions: PracticeSessionSummary[]) {
   }, null);
 }
 
+function formatMeters(value: number | null) {
+  if (value === null) return "—";
+  return `${new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 1,
+  }).format(value)} m`;
+}
+
 export default function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -220,6 +227,28 @@ export default function DashboardPage() {
     activeSession && selection.club
       ? activeSession.shots.filter((shot) => shot.club === selection.club)
       : (activeSession?.shots ?? []);
+  const carryValues = filteredShots.map((shot) => shot.carry);
+  const medianValues = [...carryValues].sort((a, b) => a - b);
+  const averageCarry =
+    carryValues.length > 0
+      ? carryValues.reduce((sum, value) => sum + value, 0) /
+        carryValues.length
+      : null;
+  const medianCarry =
+    medianValues.length === 0
+      ? null
+      : medianValues.length % 2 === 1
+        ? medianValues[Math.floor(medianValues.length / 2)]
+        : (medianValues[medianValues.length / 2 - 1] +
+            medianValues[medianValues.length / 2]) /
+          2;
+  const averageDistanceFromTargetLine =
+    filteredShots.length > 0
+      ? filteredShots.reduce(
+          (sum, shot) => sum + Math.abs(shot.carrySide),
+          0,
+        ) / filteredShots.length
+      : null;
 
   return (
     <>
@@ -316,15 +345,34 @@ export default function DashboardPage() {
                   {selectedDetails.message}
                 </p>
               ) : (
-                <div className="dashboard__charts">
-                  <ShotDispersionChart
-                    key={selectedSession.id}
-                    shots={filteredShots}
-                    clubs={clubs}
-                    selectedClub={selection.club}
-                  />
-                  <ShotDirection shots={filteredShots} />
-                </div>
+                <>
+                  <section
+                    className="dashboard__metrics"
+                    aria-label="Practice session summary"
+                  >
+                    <article className="dashboard__metric">
+                      <h2>Average carry</h2>
+                      <p>{formatMeters(averageCarry)}</p>
+                    </article>
+                    <article className="dashboard__metric">
+                      <h2>Median carry</h2>
+                      <p>{formatMeters(medianCarry)}</p>
+                    </article>
+                    <article className="dashboard__metric">
+                      <h2>Average distance from target line</h2>
+                      <p>{formatMeters(averageDistanceFromTargetLine)}</p>
+                    </article>
+                  </section>
+                  <div className="dashboard__charts">
+                    <ShotDispersionChart
+                      key={selectedSession.id}
+                      shots={filteredShots}
+                      clubs={clubs}
+                      selectedClub={selection.club}
+                    />
+                    <ShotDirection shots={filteredShots} />
+                  </div>
+                </>
               )}
             </>
           )}
