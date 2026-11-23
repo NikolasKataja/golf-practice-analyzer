@@ -260,24 +260,52 @@ export default function DashboardPage() {
             </p>
           ) : (
             <>
-              <label className="dashboard__session-select">
-                <span>Practice session</span>
-                <select
-                  value={selectedSessionId ?? ""}
-                  onChange={(event) =>
-                    setSelection({
-                      sessionId: Number(event.currentTarget.value),
-                      club: "",
-                    })
-                  }
-                >
-                  {sessions.map((session) => (
-                    <option key={session.id} value={session.id}>
-                      {session.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="dashboard__filters">
+                <label className="dashboard__filter dashboard__filter--session">
+                  <span>Practice session</span>
+                  <select
+                    value={selectedSessionId ?? ""}
+                    onChange={(event) =>
+                      setSelection({
+                        sessionId: Number(event.currentTarget.value),
+                        club: "",
+                      })
+                    }
+                  >
+                    {sessions.map((session) => (
+                      <option key={session.id} value={session.id}>
+                        {session.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="dashboard__filter">
+                  <span>Club</span>
+                  <select
+                    value={selection.club}
+                    onChange={(event) =>
+                      setSelection((current) => ({
+                        ...current,
+                        club: event.currentTarget.value,
+                      }))
+                    }
+                    disabled={clubs.length === 0}
+                  >
+                    <option value="">All clubs</option>
+                    {clubs.map((club) => (
+                      <option key={club} value={club}>
+                        {club}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {activeSession && (
+                  <p className="dashboard__shot-count" role="status">
+                    {filteredShots.length}{" "}
+                    {filteredShots.length === 1 ? "shot" : "shots"}
+                  </p>
+                )}
+              </div>
 
               {!selectedSession || !selectedDetails ? (
                 <p className="dashboard__message" role="status">
@@ -294,9 +322,6 @@ export default function DashboardPage() {
                     shots={filteredShots}
                     clubs={clubs}
                     selectedClub={selection.club}
-                    onClubChange={(club) =>
-                      setSelection((current) => ({ ...current, club }))
-                    }
                   />
                   <ShotDirection shots={filteredShots} />
                 </div>

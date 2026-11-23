@@ -21,22 +21,6 @@
   font-weight: 650;
 }
 
-.filter {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
-}
-
-.filter select {
-  width: auto;
-  min-width: 9rem;
-  min-height: 2.5rem;
-  padding: 0.375rem 0.75rem;
-}
-
 .chartContainer {
   width: 100%;
 }
@@ -118,9 +102,4 @@
     align-items: flex-start;
   }
 
-  .filter {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
 }

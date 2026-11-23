@@ -19,14 +19,12 @@ type Props = {
   shots: PracticeSessionShot[];
   clubs: string[];
   selectedClub: string;
-  onClubChange: (club: string) => void;
 };
 
 export default function ShotDispersionChart({
   shots,
   clubs,
   selectedClub,
-  onClubChange,
 }: Props) {
   const colors = new Map(
     clubs.map((club, index) => [
@@ -73,21 +71,6 @@ export default function ShotDispersionChart({
     <section className={styles.card} aria-labelledby="shot-dispersion-heading">
       <div className={styles.header}>
         <h2 id="shot-dispersion-heading">Shot dispersion</h2>
-        <label className={styles.filter}>
-          <span>Club</span>
-          <select
-            value={selectedClub}
-            onChange={(event) => onClubChange(event.currentTarget.value)}
-            disabled={clubs.length === 0}
-          >
-            <option value="">All clubs</option>
-            {clubs.map((club) => (
-              <option key={club} value={club}>
-                {club}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
 
       {visibleShots.length === 0 ? (
