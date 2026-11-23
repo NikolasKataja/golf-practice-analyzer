@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import AppHeader from '../components/layout/AppHeader'
 import cardStyles from '../components/practiceSessions/PracticeSessionList.module.css'
 import ManualShotRow from '../components/practiceSessions/ManualShotRow'
-import type { ManualShotDraft } from '../components/practiceSessions/ManualShotRow'
+import type { ManualShotDraft } from '../components/practiceSessions/ShotFields'
 import { createPracticeSession } from '../api/practiceSessions'
 import './PracticeSessionEntryPages.css'
 
@@ -168,7 +168,6 @@ export default function CreatePracticeSessionPage() {
                         shot={shot}
                         number={index + 1}
                         canRemove={shots.length > 1}
-                        separateMetrics
                         onChange={(updated) =>
                           setShots((current) =>
                             current.map((item) =>

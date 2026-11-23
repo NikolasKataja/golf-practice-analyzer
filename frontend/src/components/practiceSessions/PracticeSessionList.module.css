@@ -101,39 +101,9 @@
   padding: 1rem 1.25rem;
 }
 
-.editShotTableContainer {
-  overflow-x: auto;
-}
-
-.editShotTable {
-  width: 100%;
-  min-width: 52rem;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.editShotTable th,
-.editShotTable td {
-  padding: 0.5rem;
-  border: 0;
-  vertical-align: top;
-}
-
-.editShotTable th {
-  background: transparent;
-}
-
-.editShotTable label {
-  font-size: 0.8125rem;
-}
-
-.editShotTable input,
-.editShotTable select {
-  min-width: 8rem;
-}
-
-.editShotTable details summary {
-  cursor: pointer;
+.addShotsForm {
+  padding: 1.25rem;
+  border-top: 1px solid var(--session-border);
 }
 
 .editShotActions {

@@ -127,6 +127,36 @@ export async function createPracticeSession(
   return response.json();
 }
 
+export async function addPracticeSessionShots(
+  sessionId: number,
+  shots: CreateShotRequest[],
+): Promise<PracticeSessionShot[]> {
+  const token = await getCsrfToken();
+
+  const response = await fetch(`/api/practice-sessions/${sessionId}/shots`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ shots }),
+  });
+
+  if (response.status === 401) {
+    throw new Error("Your session has expired. Sign in again.");
+  }
+
+  if (response.status === 404) {
+    throw new Error("Practice session not found.");
+  }
+
+  if (!response.ok) {
+    throw new Error(await getError(response));
+  }
+
+  return response.json();
+}
+
 export type PracticeSessionShot = {
   id: number;
   shotNumber: number;

@@ -9,6 +9,7 @@ import EditPracticeSessionForm from "../components/practiceSessions/EditPractice
 import PracticeShotTable from "../components/practiceSessions/PracticeShotTable";
 import AppHeader from "../components/layout/AppHeader";
 import "./PracticeSessionPage.css";
+import "./PracticeSessionEntryPages.css";
 
 type SessionState =
   | { status: "loading" }
@@ -166,6 +167,21 @@ function PracticeSessionContent({ id }: { id: number }) {
                     ...current.session,
                     shots: current.session.shots.filter(
                       (shot) => shot.id !== deletedShotId,
+                    ),
+                  },
+                }
+              : current,
+          )
+        }
+        onShotsAdded={(addedShots) =>
+          setState((current) =>
+            current.status === "ready"
+              ? {
+                  ...current,
+                  session: {
+                    ...current.session,
+                    shots: [...current.session.shots, ...addedShots].sort(
+                      (first, second) => first.shotNumber - second.shotNumber,
                     ),
                   },
                 }

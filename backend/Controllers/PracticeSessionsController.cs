@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using GolfPracticeAnalyzer.Api.Services;
+using System.Data;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GolfPracticeAnalyzer.Api.Controllers;
 
@@ -184,6 +186,110 @@ public class PracticeSessionsController : ControllerBase
             session.PracticeDate,
             ShotCount = session.Shots.Count
         });
+    }
+
+    [HttpPost("{id:int}/shots")]
+    public async Task<IActionResult> AddShots(
+        int id,
+        AddPracticeSessionShotsRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            await _antiforgery.ValidateRequestAsync(HttpContext);
+        }
+        catch (AntiforgeryValidationException)
+        {
+            return BadRequest(new { message = "Invalid CSRF token." });
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        await using var transaction = await _dbContext.Database
+            .BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+
+        // Lock the owned session row so concurrent batches cannot allocate
+        // overlapping shot numbers for the same practice session.
+        await using var lockCommand = _dbContext.Database
+            .GetDbConnection()
+            .CreateCommand();
+        lockCommand.Transaction = transaction.GetDbTransaction();
+        lockCommand.CommandText =
+            "SELECT `Id` FROM `PracticeSessions` WHERE `Id` = @sessionId AND `UserId` = @userId FOR UPDATE";
+
+        var sessionIdParameter = lockCommand.CreateParameter();
+        sessionIdParameter.ParameterName = "@sessionId";
+        sessionIdParameter.Value = id;
+        lockCommand.Parameters.Add(sessionIdParameter);
+
+        var userIdParameter = lockCommand.CreateParameter();
+        userIdParameter.ParameterName = "@userId";
+        userIdParameter.Value = user.Id;
+        lockCommand.Parameters.Add(userIdParameter);
+
+        var lockedSessionId = await lockCommand.ExecuteScalarAsync(cancellationToken);
+
+        if (lockedSessionId is null || lockedSessionId == DBNull.Value)
+        {
+            return NotFound(new { message = "Practice session not found." });
+        }
+
+        var session = await _dbContext.PracticeSessions
+            .SingleAsync(
+                session => session.Id == id && session.UserId == user.Id,
+                cancellationToken
+            );
+
+        var maxShotNumber = await _dbContext.Shots
+            .Where(shot => shot.PracticeSessionId == id)
+            .Select(shot => (int?)shot.ShotNumber)
+            .MaxAsync(cancellationToken) ?? 0;
+
+        if (request.Shots!.Count > int.MaxValue - maxShotNumber)
+        {
+            return BadRequest(new { message = "No more shot numbers are available." });
+        }
+
+        var newShots = request.Shots.Select((shotRequest, index) => new Shot
+        {
+            PracticeSessionId = session.Id,
+            ShotNumber = maxShotNumber + index + 1,
+            Club = shotRequest.Club!.Trim(),
+            Carry = shotRequest.Carry!.Value,
+            CarrySide = shotRequest.CarrySide!.Value,
+            BallSpeed = shotRequest.BallSpeed,
+            LaunchAngle = shotRequest.LaunchAngle,
+            PeakHeight = shotRequest.PeakHeight,
+            TotalDistance = shotRequest.TotalDistance
+        }).ToList();
+
+        _dbContext.Shots.AddRange(newShots);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id },
+            newShots.Select(shot => new
+            {
+                shot.Id,
+                shot.ShotNumber,
+                shot.ShotAt,
+                shot.Club,
+                shot.Carry,
+                shot.CarrySide,
+                shot.BallSpeed,
+                shot.LaunchAngle,
+                shot.PeakHeight,
+                shot.TotalDistance
+            })
+        );
     }
 
     [HttpPost("import/preview")]

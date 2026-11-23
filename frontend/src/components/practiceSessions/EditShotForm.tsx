@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import ManualShotRow from './ManualShotRow'
-import type { ManualShotDraft } from './ManualShotRow'
+import ShotFields from './ShotFields'
+import type { ManualShotDraft } from './ShotFields'
 import { updateShot } from '../../api/practiceSessions'
 import type { PracticeSessionShot } from '../../api/practiceSessions'
 import styles from './PracticeSessionList.module.css'
@@ -95,30 +95,8 @@ export default function EditShotForm({
       <fieldset disabled={isSaving}>
         <legend>Edit shot {shot.shotNumber}</legend>
 
-        <div className={styles.editShotTableContainer}>
-          <table className={styles.editShotTable}>
-            <caption>Change the shot measurements before saving</caption>
-            <thead>
-              <tr>
-                <th scope="col">Shot</th>
-                <th scope="col">Club</th>
-                <th scope="col">Carry</th>
-                <th scope="col">Side</th>
-                <th scope="col">Optional data</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <ManualShotRow
-                shot={draft}
-                number={shot.shotNumber}
-                canRemove={false}
-                hideRemove
-                onChange={setDraft}
-                onRemove={() => {}}
-              />
-            </tbody>
-          </table>
+        <div className="practice-entry__shots">
+          <ShotFields shot={draft} onChange={setDraft} />
         </div>
 
         <div className={styles.editShotActions}>

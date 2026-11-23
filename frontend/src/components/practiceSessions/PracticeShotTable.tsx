@@ -5,7 +5,9 @@ import {
   type PracticeSessionShot,
 } from "../../api/practiceSessions";
 import styles from "./PracticeSessionList.module.css";
+import AddPracticeShotsForm from "./AddPracticeShotsForm";
 import EditShotForm from "./EditShotForm";
+import SuccessToast from "../SuccessToast";
 
 type ShotActionsProps = {
   sessionId: number;
@@ -223,6 +225,7 @@ type PracticeShotTableProps = {
   shots: PracticeSessionShot[];
   onShotSaved: (shot: PracticeSessionShot) => void;
   onShotDeleted: (shotId: number) => void;
+  onShotsAdded: (shots: PracticeSessionShot[]) => void;
 };
 
 export default function PracticeShotTable({
@@ -230,16 +233,55 @@ export default function PracticeShotTable({
   shots,
   onShotSaved,
   onShotDeleted,
+  onShotsAdded,
 }: PracticeShotTableProps) {
   const [editingShotId, setEditingShotId] = useState<number | null>(null);
   const [isSavingShot, setIsSavingShot] = useState(false);
   const [deletingShotId, setDeletingShotId] = useState<number | null>(null);
+  const [isAddingShots, setIsAddingShots] = useState(false);
+  const [addedShotCount, setAddedShotCount] = useState<number | null>(null);
 
   return (
     <section className={styles.card} aria-labelledby="practice-shots-heading">
       <div className={styles.header}>
         <h2 id="practice-shots-heading">Shots ({shots.length})</h2>
+        <button
+          className="button-secondary"
+          type="button"
+          disabled={
+            isAddingShots || isSavingShot || deletingShotId !== null
+          }
+          aria-expanded={isAddingShots}
+          aria-controls="add-practice-shots-form"
+          onClick={() => setIsAddingShots(true)}
+        >
+          + Add shots
+        </button>
       </div>
+
+      {isAddingShots && (
+        <div id="add-practice-shots-form">
+          <AddPracticeShotsForm
+            sessionId={sessionId}
+            onCancel={() => setIsAddingShots(false)}
+            onSaved={(addedShots) => {
+              onShotsAdded(addedShots);
+              setAddedShotCount(addedShots.length);
+              setIsAddingShots(false);
+            }}
+          />
+        </div>
+      )}
+
+      {addedShotCount !== null && (
+        <SuccessToast
+          title="Shots added"
+          message={`${addedShotCount} ${
+            addedShotCount === 1 ? "shot" : "shots"
+          } added to this practice session.`}
+          onDismiss={() => setAddedShotCount(null)}
+        />
+      )}
 
       {shots.length === 0 ? (
         <p className={styles.message}>This practice session has no shots.</p>
