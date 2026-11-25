@@ -2,7 +2,7 @@ import type { PracticeSessionShot } from "../../api/practiceSessions";
 import styles from "./ShotDispersionChart.module.css";
 import { TARGET_ZONE_HALF_WIDTH_METERS } from "./targetZone";
 
-const plot = { left: 76, right: 780, top: 24, bottom: 350 };
+const plot = { left: 60, right: 796, top: 16, bottom: 170 };
 
 function niceStep(rawStep: number) {
   const power = 10 ** Math.floor(Math.log10(rawStep));
@@ -80,7 +80,7 @@ export default function ShotDispersionChart({
           <div className={styles.chartContainer}>
             <svg
               className={styles.chart}
-              viewBox="0 0 820 430"
+              viewBox="0 0 820 220"
               role="img"
               aria-label={`Shot dispersion for ${selectedClub || "all clubs"}`}
             >
@@ -168,7 +168,7 @@ export default function ShotDispersionChart({
               <text
                 className={styles.axisLabel}
                 x={(plot.left + plot.right) / 2}
-                y="418"
+                y={plot.bottom + 40}
                 textAnchor="middle"
               >
                 Side deviation (m)

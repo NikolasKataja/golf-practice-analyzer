@@ -25,6 +25,24 @@
   font-weight: 650;
 }
 
+.compactHeader {
+  padding-block: var(--space-2);
+}
+
+.compact .table th,
+.compact .table td {
+  padding-block: var(--space-1);
+}
+
+.compact .actionsTrigger {
+  min-height: 2rem;
+}
+
+.compact .refreshButton {
+  min-height: 2rem;
+  padding-block: var(--space-1);
+}
+
 .refreshButton {
   padding: 0.5rem 0.875rem;
   border: 1px solid var(--session-border);

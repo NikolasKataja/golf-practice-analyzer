@@ -1,9 +1,10 @@
-.dashboard {
+.page-content.dashboard {
   max-width: none;
   margin-inline: auto;
+  padding-block: var(--space-4);
 
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-3);
 }
 
 .dashboard__intro {
@@ -17,13 +18,13 @@
 .dashboard__intro h1 {
   margin: 0;
   color: var(--color-secondary);
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-size: clamp(1.75rem, 4vw, 2rem);
   line-height: 1.15;
   letter-spacing: -0.025em;
 }
 
 .dashboard__intro p {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-1) 0 0;
   color: var(--color-text-muted);
 }
 
@@ -34,26 +35,25 @@
 .dashboard__analysis {
   display: grid;
   min-width: 0;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .dashboard__charts {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-3);
   min-width: 0;
-  align-items: start;
 }
 
 .dashboard__metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .dashboard__metric {
   min-width: 0;
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: 1rem;
   background: var(--color-surface);
@@ -67,7 +67,7 @@
 }
 
 .dashboard__metric p {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-1) 0 0;
   color: var(--color-secondary);
   font-size: clamp(1.25rem, 3vw, 1.75rem);
   font-weight: 650;
@@ -78,7 +78,7 @@
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr) auto;
   align-items: end;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .dashboard__filter {
@@ -88,15 +88,17 @@
 
 .dashboard__filter span {
   display: block;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .dashboard__filter select {
   width: 100%;
+  min-height: 2.25rem;
+  padding: var(--space-1) var(--space-3);
 }
 
 .dashboard__shot-count {
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-2);
   color: var(--color-text-muted);
   white-space: nowrap;
 }

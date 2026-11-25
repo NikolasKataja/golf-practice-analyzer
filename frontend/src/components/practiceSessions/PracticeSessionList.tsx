@@ -200,6 +200,7 @@ type PracticeSessionListProps = {
   error: string;
   onRefresh: () => void;
   onDeleted: (sessionId: number) => void;
+  compact?: boolean;
 };
 
 export default function PracticeSessionList({
@@ -208,13 +209,16 @@ export default function PracticeSessionList({
   error,
   onRefresh,
   onDeleted,
+  compact = false,
 }: PracticeSessionListProps) {
   return (
     <section
-      className={styles.card}
+      className={`${styles.card} ${compact ? styles.compact : ""}`}
       aria-labelledby="practice-sessions-heading"
     >
-      <div className={styles.header}>
+      <div
+        className={`${styles.header} ${compact ? styles.compactHeader : ""}`}
+      >
         <h2 id="practice-sessions-heading">Your practice sessions</h2>
 
         <button

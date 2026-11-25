@@ -29,7 +29,7 @@ export default function ShotDirection({ shots }: Props) {
 
   return (
     <section className={cardStyles.card} aria-labelledby="target-zone-heading">
-      <div className={cardStyles.header}>
+      <div className={`${cardStyles.header} ${cardStyles.compactHeader}`}>
         <h2 id="target-zone-heading">Target zone</h2>
       </div>
       {shots.length === 0 ? (

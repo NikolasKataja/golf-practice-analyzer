@@ -385,6 +385,7 @@ export default function DashboardPage() {
             error={sessionsError}
             onRefresh={() => setRefreshKey((current) => current + 1)}
             onDeleted={handleSessionDeleted}
+            compact
           />
         </div>
       </main>
