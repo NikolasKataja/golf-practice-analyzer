@@ -312,12 +312,13 @@ export default function DashboardPage() {
                   <span>Club</span>
                   <select
                     value={selection.club}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const club = event.currentTarget.value;
                       setSelection((current) => ({
                         ...current,
-                        club: event.currentTarget.value,
-                      }))
-                    }
+                        club,
+                      }));
+                    }}
                     disabled={clubs.length === 0}
                   >
                     <option value="">All clubs</option>
