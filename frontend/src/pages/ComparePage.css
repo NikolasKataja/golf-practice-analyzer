@@ -1,0 +1,218 @@
+.compare-page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.compare-page__intro h1 {
+  margin: 0;
+  color: var(--color-secondary);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  line-height: 1.15;
+}
+
+.compare-page__intro p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+}
+
+.compare-page__filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(10rem, 0.7fr);
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.compare-page__filters label {
+  min-width: 0;
+  margin: 0;
+}
+
+.compare-page__filters label span {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.compare-page__filters select {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+.compare-page__results {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: stretch;
+  gap: var(--space-4);
+}
+
+.comparison-table,
+.comparison-dispersion,
+.comparison-summary {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+}
+
+.comparison-dispersion {
+  display: flex;
+  flex-direction: column;
+}
+
+.comparison-table h2,
+.comparison-dispersion h2,
+.comparison-summary h2 {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-secondary);
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+
+.comparison-table__scroll {
+  overflow-x: auto;
+}
+
+.comparison-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--color-divider);
+}
+
+.comparison-table thead th {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.comparison-table tbody th {
+  font-weight: 550;
+}
+
+.comparison-table td {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.comparison-dispersion__chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.comparison-dispersion__grid {
+  stroke: var(--color-divider);
+  stroke-width: 1;
+}
+
+.comparison-dispersion__zone {
+  fill: var(--color-secondary);
+  opacity: 0.08;
+}
+
+.comparison-dispersion__target {
+  stroke: var(--color-secondary);
+  stroke-dasharray: 6 5;
+  stroke-width: 1.5;
+}
+
+.comparison-dispersion__axis {
+  stroke: var(--color-border);
+}
+
+.comparison-dispersion__tick {
+  fill: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.comparison-dispersion__label {
+  fill: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.comparison-dispersion__point-a {
+  fill: #236a4b;
+  fill-opacity: 0.8;
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
+}
+
+.comparison-dispersion__point-b {
+  fill: #bd4d2c;
+  fill-opacity: 0.8;
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
+}
+
+.comparison-dispersion__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  list-style: none;
+}
+
+.comparison-dispersion__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.comparison-dispersion__swatch-a,
+.comparison-dispersion__swatch-b {
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #236a4b;
+}
+
+.comparison-dispersion__swatch-a {
+  border-radius: 50%;
+}
+
+.comparison-dispersion__swatch-b {
+  background: #bd4d2c;
+  transform: rotate(45deg) scale(0.8);
+}
+
+.comparison-summary p,
+.compare-page__message {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.compare-page__message {
+  padding: 0;
+}
+
+.compare-page__error {
+  color: var(--color-error);
+}
+
+@media (max-width: 56rem) {
+  .compare-page__results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 40rem) {
+  .compare-page__filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

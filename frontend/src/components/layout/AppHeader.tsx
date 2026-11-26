@@ -13,6 +13,9 @@ export default function AppHeader() {
           <NavLink to="/dashboard" end>
             Dashboard
           </NavLink>
+          <NavLink to="/compare" end>
+            Compare
+          </NavLink>
           <NavLink to="/account" end>
             Account
           </NavLink>

@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage'
 import ImportPracticeSessionPage from './pages/ImportPracticeSessionPage'
 import CreatePracticeSessionPage from './pages/CreatePracticeSessionPage'
 import PracticeSessionPage from './pages/PracticeSessionPage'
+import ComparePage from './pages/ComparePage'
 
 export default function App() {
   const { isLoading, error, refreshSession } = useAuth()
@@ -45,6 +46,7 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/compare" element={<ComparePage />} />
         <Route 
           path="/practice-sessions/import"
           element={<ImportPracticeSessionPage />}
