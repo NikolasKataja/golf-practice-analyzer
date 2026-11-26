@@ -12,6 +12,7 @@ import ShotDirection from "../components/practiceSessions/ShotDirection";
 import AddPracticeSessionMenu from "../components/practiceSessions/AddPracticeSessionMenu";
 import AppHeader from "../components/layout/AppHeader";
 import SuccessToast from "../components/SuccessToast";
+import { calculateShotStatistics } from "../utils/shotStatistics";
 import "./DashboardPage.css";
 
 type DetailsState =
@@ -227,28 +228,7 @@ export default function DashboardPage() {
     activeSession && selection.club
       ? activeSession.shots.filter((shot) => shot.club === selection.club)
       : (activeSession?.shots ?? []);
-  const carryValues = filteredShots.map((shot) => shot.carry);
-  const medianValues = [...carryValues].sort((a, b) => a - b);
-  const averageCarry =
-    carryValues.length > 0
-      ? carryValues.reduce((sum, value) => sum + value, 0) /
-        carryValues.length
-      : null;
-  const medianCarry =
-    medianValues.length === 0
-      ? null
-      : medianValues.length % 2 === 1
-        ? medianValues[Math.floor(medianValues.length / 2)]
-        : (medianValues[medianValues.length / 2 - 1] +
-            medianValues[medianValues.length / 2]) /
-          2;
-  const averageDistanceFromTargetLine =
-    filteredShots.length > 0
-      ? filteredShots.reduce(
-          (sum, shot) => sum + Math.abs(shot.carrySide),
-          0,
-        ) / filteredShots.length
-      : null;
+  const statistics = calculateShotStatistics(filteredShots);
 
   return (
     <>
@@ -353,15 +333,46 @@ export default function DashboardPage() {
                   >
                     <article className="dashboard__metric">
                       <h2>Average carry</h2>
-                      <p>{formatMeters(averageCarry)}</p>
+                      <p className="dashboard__metric-value">
+                        {formatMeters(statistics.averageCarry)}
+                      </p>
+                      <p className="dashboard__metric-detail">
+                        Median carry: {formatMeters(statistics.medianCarry)}
+                      </p>
+                      <p className="dashboard__metric-detail">
+                        Shortest carry: {formatMeters(statistics.minimumCarry)}
+                      </p>
+                      <p className="dashboard__metric-detail">
+                        Longest carry: {formatMeters(statistics.maximumCarry)}
+                      </p>
                     </article>
                     <article className="dashboard__metric">
-                      <h2>Median carry</h2>
-                      <p>{formatMeters(medianCarry)}</p>
+                      <h2>Carry consistency</h2>
+                      <p className="dashboard__metric-value">
+                        {formatMeters(statistics.carryStandardDeviation)}
+                      </p>
+                      <p className="dashboard__metric-detail">
+                        Standard deviation
+                      </p>
+                      <p className="dashboard__metric-explanation">
+                        Lower values indicate more consistent carry distances.
+                      </p>
                     </article>
                     <article className="dashboard__metric">
                       <h2>Average distance from target line</h2>
-                      <p>{formatMeters(averageDistanceFromTargetLine)}</p>
+                      <p className="dashboard__metric-value">
+                        {formatMeters(
+                          statistics.averageAbsoluteDistanceFromTargetLine,
+                        )}
+                      </p>
+                      <p className="dashboard__metric-detail">
+                        Side standard deviation:{" "}
+                        {formatMeters(statistics.sideDeviationStandardDeviation)}
+                      </p>
+                      <p className="dashboard__metric-explanation">
+                        Lower side standard deviation indicates less sideways
+                        variation.
+                      </p>
                     </article>
                   </section>
                   <div className="dashboard__charts">

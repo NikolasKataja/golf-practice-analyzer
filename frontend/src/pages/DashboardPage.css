@@ -66,12 +66,20 @@
   font-weight: 500;
 }
 
-.dashboard__metric p {
+.dashboard__metric-value {
   margin: var(--space-1) 0 0;
   color: var(--color-secondary);
   font-size: clamp(1.25rem, 3vw, 1.75rem);
   font-weight: 650;
   line-height: 1.2;
+}
+
+.dashboard__metric-detail,
+.dashboard__metric-explanation {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
 }
 
 .dashboard__filters {
