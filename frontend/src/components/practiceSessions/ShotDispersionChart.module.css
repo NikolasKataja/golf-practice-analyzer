@@ -67,6 +67,13 @@
 .point {
   stroke: var(--color-surface);
   stroke-width: 1.5;
+  cursor: pointer;
+}
+
+.point:focus-visible,
+.pointSelected {
+  stroke: var(--color-focus);
+  stroke-width: 3;
 }
 
 .legend {

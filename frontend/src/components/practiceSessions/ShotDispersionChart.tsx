@@ -1,4 +1,6 @@
+import { useState, type KeyboardEvent } from "react";
 import type { PracticeSessionShot } from "../../api/practiceSessions";
+import ShotDetailsPopover from "./ShotDetailsPopover";
 import styles from "./ShotDispersionChart.module.css";
 import { TARGET_ZONE_HALF_WIDTH_METERS } from "./targetZone";
 
@@ -33,6 +35,63 @@ export default function ShotDispersionChart({
     ]),
   );
   const visibleShots = shots;
+  const datasetKey = `${selectedClub}:${JSON.stringify(
+    visibleShots.map((shot) => [
+      shot.id,
+      shot.shotNumber,
+      shot.club,
+      shot.carry,
+      shot.carrySide,
+      shot.ballSpeed,
+      shot.launchAngle,
+      shot.peakHeight,
+      shot.totalDistance,
+    ]),
+  )}`;
+  const [selection, setSelection] = useState<{
+    datasetKey: string;
+    shotId: number;
+    anchor: SVGElement;
+  } | null>(null);
+  const [previousDatasetKey, setPreviousDatasetKey] = useState(datasetKey);
+  if (previousDatasetKey !== datasetKey) {
+    setPreviousDatasetKey(datasetKey);
+    if (selection !== null) setSelection(null);
+  }
+  const selectedShot =
+    selection?.datasetKey === datasetKey
+      ? visibleShots.find((shot) => shot.id === selection.shotId)
+      : undefined;
+  const selectedAnchor = selectedShot ? selection?.anchor : undefined;
+
+  function toggleShot(shot: PracticeSessionShot, anchor: SVGElement) {
+    if (
+      selection?.datasetKey === datasetKey &&
+      selection.shotId === shot.id
+    ) {
+      setSelection(null);
+    } else {
+      setSelection({ datasetKey, shotId: shot.id, anchor });
+    }
+  }
+
+  function navigatePoints(
+    event: KeyboardEvent<SVGCircleElement>,
+    index: number,
+  ) {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+      return;
+    }
+    event.preventDefault();
+    const points =
+      event.currentTarget.ownerSVGElement?.querySelectorAll<SVGCircleElement>(
+        "[data-shot-index]",
+      );
+    if (!points?.length) return;
+    const offset =
+      event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+    points[(index + offset + points.length) % points.length].focus();
+  }
 
   const maxSide = Math.max(
     TARGET_ZONE_HALF_WIDTH_METERS,
@@ -81,7 +140,7 @@ export default function ShotDispersionChart({
             <svg
               className={styles.chart}
               viewBox="0 0 820 220"
-              role="img"
+              role="group"
               aria-label={`Shot dispersion for ${selectedClub || "all clubs"}`}
             >
               <rect
@@ -146,25 +205,44 @@ export default function ShotDispersionChart({
                 y1={plot.top}
                 y2={plot.bottom}
               />
-              {visibleShots.map((shot) => (
-                <circle
-                  key={shot.id}
-                  cx={xPosition(shot.carrySide)}
-                  cy={yPosition(shot.carry)}
-                  r="5"
-                  fill={colors.get(shot.club)}
-                  className={styles.point}
-                >
-                  <title>
-                    {shot.club} · Carry: {shot.carry} m ·{" "}
-                    {shot.carrySide === 0
-                      ? "0 m on target line"
-                      : `${Math.abs(shot.carrySide)} m ${
-                          shot.carrySide < 0 ? "left" : "right"
-                        }`}
-                  </title>
-                </circle>
-              ))}
+              {visibleShots.map((shot, index) => {
+                const isSelected =
+                  selectedShot?.id === shot.id && selectedAnchor !== undefined;
+                const label = `Shot ${shot.shotNumber}, ${shot.club}, carry ${shot.carry} meters, side deviation ${shot.carrySide} meters`;
+                return (
+                  <circle
+                    key={shot.id}
+                    cx={xPosition(shot.carrySide)}
+                    cy={yPosition(shot.carry)}
+                    r="5"
+                    fill={colors.get(shot.club)}
+                    className={`${styles.point} ${isSelected ? styles.pointSelected : ""}`}
+                    role="button"
+                    tabIndex={0}
+                    data-shot-index={index}
+                    aria-label={label}
+                    aria-expanded={isSelected}
+                    onClick={(event) => toggleShot(shot, event.currentTarget)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        toggleShot(shot, event.currentTarget);
+                      } else {
+                        navigatePoints(event, index);
+                      }
+                    }}
+                  >
+                    <title>
+                      {shot.club} · Carry: {shot.carry} m ·{" "}
+                      {shot.carrySide === 0
+                        ? "0 m on target line"
+                        : `${Math.abs(shot.carrySide)} m ${
+                            shot.carrySide < 0 ? "left" : "right"
+                          }`}
+                    </title>
+                  </circle>
+                );
+              })}
               <text
                 className={styles.axisLabel}
                 x={(plot.left + plot.right) / 2}
@@ -181,6 +259,20 @@ export default function ShotDispersionChart({
                 Carry (m)
               </text>
             </svg>
+            {selectedShot && selectedAnchor && (
+              <ShotDetailsPopover
+                shot={selectedShot}
+                anchor={selectedAnchor}
+                onDismiss={() => setSelection(null)}
+              />
+            )}
+            {selectedShot && selectedAnchor && (
+              <ShotDetailsPopover
+                shot={selectedShot}
+                anchor={selectedAnchor}
+                onDismiss={() => setSelection(null)}
+              />
+            )}
           </div>
           {!selectedClub && (
             <ul className={styles.legend} aria-label="Clubs">

@@ -154,6 +154,17 @@
   stroke-width: 1.5;
 }
 
+.comparison-dispersion g[role="button"] {
+  cursor: pointer;
+}
+
+.comparison-dispersion g[role="button"]:focus-visible circle,
+.comparison-dispersion g[role="button"]:focus-visible path,
+.comparison-dispersion__point-selected {
+  stroke: var(--color-focus);
+  stroke-width: 3;
+}
+
 .comparison-dispersion__legend {
   display: flex;
   flex-wrap: wrap;

@@ -1,4 +1,6 @@
+import { useState, type KeyboardEvent } from "react";
 import type { PracticeSessionShot } from "../../api/practiceSessions";
+import ShotDetailsPopover from "./ShotDetailsPopover";
 import { TARGET_ZONE_HALF_WIDTH_METERS } from "./targetZone";
 
 const plot = { left: 60, right: 796, top: 18, bottom: 380 };
@@ -30,6 +32,72 @@ export default function ComparisonDispersionChart({
     ...shotsA.map((shot) => ({ shot, session: "A" as const })),
     ...shotsB.map((shot) => ({ shot, session: "B" as const })),
   ];
+  const datasetKey = JSON.stringify([
+    sessionAName,
+    sessionBName,
+    shots.map(({ shot, session }) => [
+      session,
+      shot.id,
+      shot.shotNumber,
+      shot.club,
+      shot.carry,
+      shot.carrySide,
+      shot.ballSpeed,
+      shot.launchAngle,
+      shot.peakHeight,
+      shot.totalDistance,
+    ]),
+  ]);
+  const [selection, setSelection] = useState<{
+    datasetKey: string;
+    shotId: number;
+    session: "A" | "B";
+    anchor: SVGElement;
+  } | null>(null);
+  const [previousDatasetKey, setPreviousDatasetKey] = useState(datasetKey);
+  if (previousDatasetKey !== datasetKey) {
+    setPreviousDatasetKey(datasetKey);
+    if (selection !== null) setSelection(null);
+  }
+  const selectedShot =
+    selection?.datasetKey === datasetKey
+      ? shots.find(
+          ({ shot, session }) =>
+            shot.id === selection.shotId && session === selection.session,
+        )
+      : undefined;
+  const selectedAnchor = selectedShot ? selection?.anchor : undefined;
+
+  function toggleShot(
+    shot: PracticeSessionShot,
+    session: "A" | "B",
+    anchor: SVGElement,
+  ) {
+    if (
+      selection?.datasetKey === datasetKey &&
+      selection.shotId === shot.id &&
+      selection.session === session
+    ) {
+      setSelection(null);
+    } else {
+      setSelection({ datasetKey, shotId: shot.id, session, anchor });
+    }
+  }
+
+  function navigatePoints(event: KeyboardEvent<SVGGElement>, index: number) {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+      return;
+    }
+    event.preventDefault();
+    const points =
+      event.currentTarget.ownerSVGElement?.querySelectorAll<SVGGElement>(
+        "[data-shot-index]",
+      );
+    if (!points?.length) return;
+    const offset =
+      event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+    points[(index + offset + points.length) % points.length].focus();
+  }
   const xBound = Math.max(
     TARGET_ZONE_HALF_WIDTH_METERS,
     ...shots.map(({ shot }) => Math.abs(shot.carrySide)),
@@ -147,29 +215,51 @@ export default function ComparisonDispersionChart({
               y1={plot.top}
               y2={plot.bottom}
             />
-            {shots.map(({ shot, session }) => (
-              <g
-                key={`${session}-${shot.id}`}
-                transform={`translate(${xPosition(shot.carrySide)} ${yPosition(shot.carry)})`}
-              >
-                {session === "A" ? (
-                  <circle
-                    className="comparison-dispersion__point-a"
-                    r="5"
-                  />
-                ) : (
-                  <path
-                    className="comparison-dispersion__point-b"
-                    d="M 0 -6 L 6 0 L 0 6 L -6 0 Z"
-                  />
-                )}
-                <title>
-                  Session {session} ({session === "A" ? sessionAName : sessionBName}) ·{" "}
-                  {shot.club} · Carry: {shot.carry} m · Side deviation:{" "}
-                  {shot.carrySide} m
-                </title>
-              </g>
-            ))}
+            {shots.map(({ shot, session }, index) => {
+              const isSelected =
+                selectedShot?.shot.id === shot.id &&
+                selectedShot.session === session &&
+                selectedAnchor !== undefined;
+              return (
+                <g
+                  key={`${session}-${shot.id}`}
+                  transform={`translate(${xPosition(shot.carrySide)} ${yPosition(shot.carry)})`}
+                  role="button"
+                  tabIndex={0}
+                  data-shot-index={index}
+                  aria-label={`Session ${session}, shot ${shot.shotNumber}, ${shot.club}, carry ${shot.carry} meters, side deviation ${shot.carrySide} meters`}
+                  aria-expanded={isSelected}
+                  onClick={(event) =>
+                    toggleShot(shot, session, event.currentTarget)
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleShot(shot, session, event.currentTarget);
+                    } else {
+                      navigatePoints(event, index);
+                    }
+                  }}
+                >
+                  {session === "A" ? (
+                    <circle
+                      className={`comparison-dispersion__point-a${isSelected ? " comparison-dispersion__point-selected" : ""}`}
+                      r="5"
+                    />
+                  ) : (
+                    <path
+                      className={`comparison-dispersion__point-b${isSelected ? " comparison-dispersion__point-selected" : ""}`}
+                      d="M 0 -6 L 6 0 L 0 6 L -6 0 Z"
+                    />
+                  )}
+                  <title>
+                    Session {session} ({session === "A" ? sessionAName : sessionBName}) ·{" "}
+                    {shot.club} · Carry: {shot.carry} m · Side deviation:{" "}
+                    {shot.carrySide} m
+                  </title>
+                </g>
+              );
+            })}
             <text
               className="comparison-dispersion__label"
               x={(plot.left + plot.right) / 2}
@@ -186,6 +276,16 @@ export default function ComparisonDispersionChart({
               Carry (m)
             </text>
           </svg>
+          {selectedShot && selectedAnchor && (
+            <ShotDetailsPopover
+              shot={selectedShot.shot}
+              sessionName={
+                selectedShot.session === "A" ? sessionAName : sessionBName
+              }
+              anchor={selectedAnchor}
+              onDismiss={() => setSelection(null)}
+            />
+          )}
           <ul className="comparison-dispersion__legend">
             <li>
               <span className="comparison-dispersion__swatch-a" />
